@@ -1,1895 +1,881 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPARTA MTD Sales Performance Dashboard</title>
-    <!-- Load Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>কোলগেট স্মাইল হাব - ফর্ম</title>
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Chart.js and DataLabels Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Google Fonts: Noto Sans Bengali for better Bangla rendering -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+Bengali:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f9;
-        }
-        /* Custom Gradient Fill for Header (VIBRANT GREEN-TO-PURPLE) */
-        .header-gradient {
-            /* Vibrant Green (#11998e) to Deep Violet (#6a0dad) - approx. 120deg */
-            background: linear-gradient(120deg, #11998e 0%, #6a0dad 100%); 
-        }
-
-        .gauge-meter {
-            height: 10px;
-            border-radius: 9999px;
-            overflow: hidden;
-            background-color: #e5e7eb; /* Gray-200 */
-        }
-        .gauge-fill {
-            transition: width 0.7s ease-out;
-            border-radius: 9999px;
-            height: 100%; 
-        }
-        /* RAG Colors for Gauge Fill & Background */
-        .fill-green { background-color: #10b981; } /* Emerald-500 */
-        .fill-amber { background-color: #f59e0b; } /* Amber-500 */
-        .fill-red { background-color: #ef4444; } /* Red-500 */
-        .fill-blue { background-color: #3b82f6; } /* Blue-500 for benchmark */
-        
-        /* RAG Colors for Rings/Text */
-        .ring-green { --tw-ring-color: #10b981; }
-        .ring-amber { --tw-ring-color: #f59e0b; }
-        .ring-red { --tw-ring-color: #ef4444; }
-        .ring-blue { --tw-ring-color: #3b82f6; }
-
-        .text-green { color: #10b981; }
-        .text-amber { color: #f59e0b; }
-        .text-red { color: #ef4444; }
-        .text-blue { color: #3b82f6; }
-        /* Added specific colors for comparison text */
-        .text-red-600 { color: #dc2626; } 
-        .text-green-600 { color: #059669; }
-
-        .text-gray-400 { color: #9ca3af; }
-
-        .chart-bar {
-            transition: width 0.7s ease-out;
-            height: 100%;
-            min-width: 1rem; /* Minimum width for visibility */
+            font-family: 'Noto Sans Bengali', 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            /* Blue themed gradient for Colgate Palmolive */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(220, 72%, 90%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(210, 80%, 95%, 1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(230, 80%, 90%, 1) 0, transparent 50%);
+            background-size: cover;
+            min-height: 100vh;
         }
         
-        /* --- NEW TAB STYLES --- */
-        .tab-button {
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem; /* rounded-lg */
-            font-weight: 500;
-            font-size: 0.875rem; /* text-sm */
-            transition: all 0.2s ease-in-out;
-            border: 2px solid transparent;
-            cursor: pointer;
-        }
-        .tab-active {
-            background-color: white;
-            color: #11998e; /* Match header green */
-            font-weight: 700;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .tab-inactive {
-            background-color: transparent;
-            color: #f4f7f9; /* Light text */
-            opacity: 0.8;
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-        .tab-inactive:hover {
-            opacity: 1;
-            background-color: rgba(255, 255, 255, 0.1);
+        /* Custom loading spinner animation */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #2563eb; /* Blue spinner */
+            width: 24px;
+            height: 24px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
         }
 
-        /* Trend Button Styles */
-        .trend-btn {
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 0.375rem;
-            border: 1px solid #e5e7eb;
-            background-color: white;
-            color: #4b5563;
-            transition: all 0.2s;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .trend-btn:hover {
-            background-color: #f9fafb;
-            border-color: #d1d5db;
-        }
-        .trend-btn.active {
-            background-color: #6a0dad; /* Purple */
-            color: white;
-            border-color: #6a0dad;
+
+        .input-group:focus-within label {
+            color: #2563eb; /* Blue focus label */
         }
         
-        /* Fix for sticky column alignment in table */
-        @media (min-width: 1024px) {
-            .min-w-full th:first-child,
-            .min-w-full td:first-child {
-                position: sticky;
-                left: 0;
-                z-index: 10;
-                box-shadow: 2px 0 3px -1px rgba(0, 0, 0, 0.05); /* subtle shadow for separation */
-            }
-            .min-w-full td:first-child {
-                background-color: white;
-            }
-            .min-w-full tfoot td:first-child {
-                 background-color: #f3f4f6; /* Gray-100 */
-            }
+        .input-group:focus-within i {
+            color: #2563eb; /* Blue focus icon */
         }
-        
     </style>
 </head>
-<body class="p-4 sm:p-8">
+<body class="flex items-center justify-center p-3 sm:p-4">
 
-    <div id="app" class="max-w-7xl mx-auto">
-
-        <!-- Header: Title, Subtitle, and Filter Controls -->
-        <header class="header-gradient p-6 rounded-xl shadow-xl mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center border border-gray-200">
-            <div class="mb-4 xl:mb-0">
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-white">SPARTA MTD Sales Performance</h1>
-                <!-- UPDATED DATE -->
-                <p class="text-lg text-gray-200 mt-1">(Data as of Nov 24th, 2025)</p>
-            </div>
-            
-            <!-- Filter Dropdowns Section (Compact layout) -->
-            <div id="filter-controls" class="flex flex-wrap gap-2 p-2 bg-gray-900/10 rounded-lg shadow-inner border border-gray-400">
-                <!-- Dropdowns will be dynamically inserted here by JavaScript -->
-            </div>
-        </header>
-
-        <!-- KPI Cards Section (5 Cards) -->
-        <div id="kpi-cards" class="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 mb-6">
-            <!-- Cards will be dynamically inserted here -->
-        </div>
-
-        <!-- NEW TAB CONTROLS (MOVED HERE) -->
-        <div class="flex justify-center mb-6 z-10 relative">
-            <div class="flex p-1 bg-gray-700/30 rounded-lg shadow-md backdrop-blur-sm">
-                <button id="tab-territory" class="tab-button tab-active">
-                    Territory Update
-                </button>
-                <button id="tab-db" class="tab-button tab-inactive">
-                    DB Update
-                </button>
-                <button id="tab-sr" class="tab-button tab-inactive">
-                    DFF Update
-                </button>
-            </div>
-        </div>
-
-        <!-- Section 2: Visuals (Toggled Panels) -->
+    <!-- Form Container -->
+    <!-- Removed hover scale effect for better mobile performance -->
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
         
-        <!-- Visuals Panel 1: Main (DB/SR Health & Territory/DB Chart) -->
-        <div id="visuals-panel-main" style="display: grid;" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 sm:p-8 text-center relative overflow-hidden">
+            <!-- Decorative background shape -->
+            <div class="absolute top-0 left-0 w-full h-full bg-blue-700 opacity-20 transform -skew-y-6 origin-top-left"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-xl sm:text-2xl font-bold text-white">কোলগেট স্মাইল হাব</h2>
+                <p class="text-blue-100 mt-2 text-sm">
+                    নতুন দোকান যুক্ত করার জন্য নিচের ফর্মটি পূরণ করুন
+                </p>
+            </div>
+        </div>
 
-            <!-- Performance Status (DB & SR) -->
-            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Performance Status (DB & SR)</h2>
-                <p class="text-sm text-gray-500 mb-4">No. of performers Above 90%, 85-90%, and Below 85% of Time elapsed %.</p>
+        <!-- Form Content -->
+        <div class="p-5 sm:p-8">
+            <form id="customForm" class="space-y-4 sm:space-y-5">
                 
-                <!-- SR Status: This will be dynamically updated by updateSrStatus() -->
-                <div id="sr-health" class="mb-6 border-b pb-4 border-gray-100">
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">SR Status (Total: 0)</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: 0%;">0</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: 0%; min-width: 1.5rem;">0</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: 0%;">0</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: 0</span>
-                        <span class="text-amber">85-90%: 0</span>
-                        <span class="text-red">Below 85%: 0</span>
+                <!-- Hidden Fields to store the split values for backend -->
+                <input type="hidden" name="distributor_code" id="distributor_code">
+                <input type="hidden" name="distributor_name" id="distributor_name">
+                <input type="hidden" name="route_code" id="route_code">
+                <input type="hidden" name="route_name" id="route_name">
+
+                <!-- Field 1: Distributor Dropdown -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        ডিস্ট্রিবিউশন (Distributor) <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="truck" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <select id="distributorSelect" required
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none appearance-none">
+                            <option value="" disabled selected>ডিস্ট্রিবিউশন সিলেক্ট করুন</option>
+                            <!-- Options populated by JS -->
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                        </div>
                     </div>
                 </div>
 
-                <!-- DB Status: This will be dynamically updated by updateDbStatus() -->
-                <div id="db-health">
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">DB Status (Total: 0)</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: 0%;">0</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: 0%; min-width: 1.5rem;">0</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: 0%;">0</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: 0</span>
-                        <span class="text-amber">85-90%: 0</span>
-                        <span class="text-red">Below 85%: 0</span>
+                <!-- Field 2: Route Dropdown -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        রুট (Route) <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="map" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <select id="routeSelect" required disabled
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none appearance-none">
+                            <option value="" disabled selected>প্রথমে ডিস্ট্রিবিউশন সিলেক্ট করুন</option>
+                            <!-- Options populated by JS -->
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Field 5: Channel Type -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        চ্যানেল টাইপ (Channel Type) <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="shopping-bag" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <select name="channel_type" required
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none appearance-none">
+                            <option value="" disabled selected>চ্যানেল টাইপ সিলেক্ট করুন</option>
+                            <option value="General Stores">General Stores</option>
+                            <option value="Pharmacy">Pharmacy</option>
+                            <option value="Grocery stores">Grocery stores</option>
+                            <option value="Wholesale">Wholesale</option>
+                            <option value="Cosmetic Store">Cosmetic Store</option>
+                            <option value="Modern Trade">Modern Trade</option>
+                            <option value="Others">Others</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Field 6: Outlet Name (English) -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        দোকানের নাম (ইংরেজিতে) <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="store" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <input type="text" name="outlet_name_en" required
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                            placeholder="Store Name in English">
+                    </div>
+                </div>
+
+                <!-- Field 7: Outlet Name (Bangla) -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        দোকানের নাম (বাংলায়) <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="type" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <input type="text" name="outlet_name_bn" required
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                            placeholder="দোকানের নাম বাংলায় লিখুন">
+                    </div>
+                </div>
+
+                <!-- Field 8: Owner Name -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        মালিকের নাম (Owner Name) <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="user" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <input type="text" name="owner_name" required
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                            placeholder="মালিকের নাম লিখুন">
+                    </div>
+                </div>
+
+                <!-- Field 9: Owner Mobile -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        মালিকের মোবাইল নাম্বার <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="phone" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <input type="tel" name="owner_mobile" required
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                            placeholder="01XXXXXXXXX">
+                    </div>
+                </div>
+
+                <!-- Field 10: Shop Image Upload -->
+                <div class="input-group relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                        দোকানের ছবি (Shop Image) <span class="text-blue-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="image" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                        </div>
+                        <input type="file" id="shop_image" name="shop_image" required accept="image/*"
+                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">দোকানের ডিসপ্লের একটি পরিষ্কার ছবি আপলোড করুন।</p>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:-translate-y-0.5">
+                    <span id="btnText">জমা দিন (Submit)</span>
+                    <div id="btnLoader" class="loader hidden"></div>
+                </button>
+
+            </form>
+
+            <!-- Success Message (Hidden by default) -->
+            <div id="successMessage" class="hidden text-center py-4 animate-fade-in">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                    <i data-lucide="check" class="h-6 w-6 text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">সফলভাবে জমা দেওয়া হয়েছে!</h3>
+                <p class="text-sm text-gray-500 mt-2">আমরা আপনার তথ্য পেয়েছি।</p>
+                <button onclick="resetForm()" class="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium">আরেকটি ফর্ম পূরণ করুন</button>
+            </div>
+            
+            <!-- Error Message (Hidden by default) -->
+             <div id="errorMessage" class="hidden text-center py-4 text-red-600 text-sm">
+                কিছু ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।
             </div>
 
-            <!-- Chart Section (Toggles between Territory and DB) -->
-            <div class="lg:col-span-2">
-                <!-- Territory STT Achievement Chart (Visible by default) -->
-                <div id="territory-chart-container" style="display: block;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Territory STT Achievement vs. Target</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">65.38%</span> (Ranked by Achievement)</p>
-                    <div id="stt-chart" class="space-y-4">
-                        <!-- Chart bars populated by JS -->
-                    </div>
-                </div>
-
-                <!-- DB STT Achievement Chart (Hidden by default) -->
-                <div id="db-chart-container" style="display: none;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">DB STT Achievement vs. Target (Aggregated)</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">65.38%</span> (Ranked by Achievement)</p>
-                    <div id="db-stt-chart" class="space-y-4">
-                        <!-- Chart bars populated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- NEW COMBO CHART SECTION (Spans full width in this panel) -->
-            <div id="combo-chart-section" class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">Daily Sales vs. ERC Trend</h2>
-                        <p class="text-sm text-gray-500">Day-wise trend of STT Achievement (Line) vs. ERC Achievement (Column).</p>
-                    </div>
-                    <!-- Trend Filter Buttons -->
-                    <div class="flex flex-wrap gap-2" id="trend-buttons">
-                        <button class="trend-btn active" data-filter="MTD">MTD</button>
-                        <button class="trend-btn" data-filter="L3D">L3D</button>
-                        <button class="trend-btn" data-filter="W1">W1</button>
-                        <button class="trend-btn" data-filter="W2">W2</button>
-                        <button class="trend-btn" data-filter="W3">W3</button>
-                        <button class="trend-btn" data-filter="W4">W4</button>
-                    </div>
-                </div>
-                <div class="relative h-80 md:h-96">
-                    <canvas id="comboChart"></canvas>
-                </div>
-            </div>
         </div>
-
-        <!-- Visuals Panel 2: SR View (Top/Bottom 10) -->
-        <div id="visuals-panel-sr" style="display: none;" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-            
-            <!-- Top 10 SR Chart -->
-            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">65.38%</span></p>
-                <div id="top-10-sr-chart" class="space-y-4">
-                    <!-- Top 10 SRs populated by JS -->
-                </div>
-            </div>
-            
-            <!-- Bottom 10 SR Chart -->
-            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Bottom 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">65.38%</span></p>
-                <div id="bottom-10-sr-chart" class="space-y-4">
-                    <!-- Bottom 10 SRs populated by JS -->
-                </div>
-            </div>
-            
+        
+        <!-- Footer -->
+        <div class="bg-gray-50 px-8 py-4 border-t border-gray-100">
+            <p class="text-xs text-center text-gray-400">কোলগেট স্মাইল হাব প্রোগ্রাম &copy; ২০২৫</p>
         </div>
-
-        <!-- TAB PANELS WRAPPER -->
-        <div id="tab-panels">
-
-            <!-- Panel 1: Territory (Visible by default) -->
-            <div id="panel-territory" style="display: block;">
-                <!-- Section 3: Detailed Territory Table -->
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed Territory Performance MTD</h2>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">Territory</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                                </tr>
-                            </thead>
-                            <tbody id="territory-list" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be populated here by JavaScript -->
-                            </tbody>
-                            <!-- Grand Total Row will be appended here by JS -->
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Panel 2: DB (Hidden by default) -->
-            <div id="panel-db" style="display: none;">
-                <!-- Section 4: Detailed DB Table -->
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DB Performance MTD (Aggregated)</h2>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">DB Name</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                                </tr>
-                            </thead>
-                            <tbody id="db-list" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be populated here by JavaScript -->
-                            </tbody>
-                            <!-- Grand Total Row will be appended here by JS -->
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 3: SR (Hidden by default) -->
-            <div id="panel-sr" style="display: none;">
-                <!-- Section 5: Detailed SR Table -->
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DFF Performance MTD</h2>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">DFF Name</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sr-list" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be populated here by JavaScript -->
-                            </tbody>
-                            <!-- Grand Total Row will be appended here by JS -->
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div> <!-- End of Tab Panels Wrapper -->
     </div>
 
     <script>
-        // --- GLOBAL HELPER FUNCTIONS (Moved outside DOMContentLoaded) ---
+        // Initialize Icons
+        lucide.createIcons();
+
+        const form = document.getElementById('customForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        const distributorSelect = document.getElementById('distributorSelect');
+        const routeSelect = document.getElementById('routeSelect');
+
+        // Embedded Data (TSV Format)
+        const rawData = `B002\tTakwa Enterprise\tBDR0000040\tSOLMAID
+B002\tTakwa Enterprise\tBDR0000041\tNORDDA
+B002\tTakwa Enterprise\tBDR0000042\tKURATOLI
+B002\tTakwa Enterprise\tBDR0000043\tBASHUNDHARA
+B002\tTakwa Enterprise\tBDR0000044\tJOARSAHARA
+B002\tTakwa Enterprise\tBDR0000045\tCOKACOLA
+B002\tTakwa Enterprise\tBDR0000046\tKALACHADPUR
+B002\tTakwa Enterprise\tBDR0000047\tAFTAB NAGAR
+B002\tTakwa Enterprise\tBDR0000048\tSOUTH ANONDDA NAGOR
+B002\tTakwa Enterprise\tBDR0000049\tNOTUN BAZAR
+B002\tTakwa Enterprise\tBDR0000050\tMIDDLE BADDA
+B002\tTakwa Enterprise\tBDR0000051\tSHAHAJADPUR 2
+B002\tTakwa Enterprise\tBDR0000052\tKHILBARIRTEK
+B002\tTakwa Enterprise\tBDR0000053\tBHATARA
+B002\tTakwa Enterprise\tBDR0000054\tNURERCHALA
+B002\tTakwa Enterprise\tBDR0000055\tSHAHAJADPUR 1
+B002\tTakwa Enterprise\tBDR0000056\tPOST OFFICE GOLI
+B002\tTakwa Enterprise\tBDR0000057\tWIRELESS GATE
+B002\tTakwa Enterprise\tBDR0000058\tGULSHAN 2
+B002\tTakwa Enterprise\tBDR0000059\tGULSHAN 1
+B002\tTakwa Enterprise\tBDR0000060\tMOHAKHALI BAZAR
+B002\tTakwa Enterprise\tBDR0000061\tBANANI 2
+B002\tTakwa Enterprise\tBDR0000062\tBANANI 1
+B002\tTakwa Enterprise\tBDR0000063\tDOHS
+B002\tTakwa Enterprise\tBDR0000064\tSCHOOL ROAD
+B002\tTakwa Enterprise\tBDR0000065\tGUDARAGHAT 2
+B002\tTakwa Enterprise\tBDR0000066\tSOUTH BADDA
+B002\tTakwa Enterprise\tBDR0000067\tMERUL BADDA
+B002\tTakwa Enterprise\tBDR0000068\tUTTAR BADDA 1
+B002\tTakwa Enterprise\tBDR0000069\tNIKETAN
+B002\tTakwa Enterprise\tBDR0000070\tSOUTH PARA
+B002\tTakwa Enterprise\tBDR0000071\tGUDARAGHAT 1
+B002\tTakwa Enterprise\tBDR0000072\tUTTAR BADDA 2
+B002\tTakwa Enterprise\tBDR0000073\tBERAID
+B002\tTakwa Enterprise\tBDR0000074\tKICHEN MARKET
+B002\tTakwa Enterprise\tBDR0000075\tEAST NAKHALPARA
+B002\tTakwa Enterprise\tBDR0000076\tKARWAN BAZAR
+B002\tTakwa Enterprise\tBDR0000077\tWEST NAKHAL PARA
+B002\tTakwa Enterprise\tBDR0000078\tKUNI PARA
+B002\tTakwa Enterprise\tBDR0000079\tTEJKUNIPARA
+B002\tTakwa Enterprise\tBDR0000080\tSTATION ROAD
+B002\tTakwa Enterprise\tBDR0000082\tSHAHINBAG
+B002\tTakwa Enterprise\tBDR0000083\tCOLONI BAZAR
+B003\tM/S Sanuar Enterprise\tBDR0000084\t24 FUT
+B003\tM/S Sanuar Enterprise\tBDR0000085\tALAMBAG
+B003\tM/S Sanuar Enterprise\tBDR0000086\tASIATIK MARKET
+B003\tM/S Sanuar Enterprise\tBDR0000087\tBIBIR BAGICHA
+B003\tM/S Sanuar Enterprise\tBDR0000088\tCOMISONAR ROAD
+B003\tM/S Sanuar Enterprise\tBDR0000089\tDALKANAGAR
+B003\tM/S Sanuar Enterprise\tBDR0000090\tDHONIYA
+B003\tM/S Sanuar Enterprise\tBDR0000091\tDHUPKHOLA
+B003\tM/S Sanuar Enterprise\tBDR0000092\tFARIDABAD
+B003\tM/S Sanuar Enterprise\tBDR0000093\tFARM ER MOR
+B003\tM/S Sanuar Enterprise\tBDR0000094\tGOBINDOPUR-1
+B003\tM/S Sanuar Enterprise\tBDR0000095\tGOBINDOPUR-2
+B003\tM/S Sanuar Enterprise\tBDR0000096\tJATRABARI
+B003\tM/S Sanuar Enterprise\tBDR0000097\tKAJLA
+B003\tM/S Sanuar Enterprise\tBDR0000098\tKARIM ULLAR BAG
+B003\tM/S Sanuar Enterprise\tBDR0000099\tKONA PARA
+B003\tM/S Sanuar Enterprise\tBDR0000100\tMANIK NAGAR 1
+B003\tM/S Sanuar Enterprise\tBDR0000101\tMANIK NAGAR 2
+B003\tM/S Sanuar Enterprise\tBDR0000102\tMATUAIL-1
+B003\tM/S Sanuar Enterprise\tBDR0000103\tMATUAIL-2
+B003\tM/S Sanuar Enterprise\tBDR0000104\tMERAJ NOGOR-1
+B003\tM/S Sanuar Enterprise\tBDR0000105\tMERAJ NOGOR-2
+B003\tM/S Sanuar Enterprise\tBDR0000106\tMIRHAZIBAG
+B003\tM/S Sanuar Enterprise\tBDR0000107\tMURADPUR
+B003\tM/S Sanuar Enterprise\tBDR0000108\tMUSLIM NOGOR
+B003\tM/S Sanuar Enterprise\tBDR0000109\tNOANAGAR
+B003\tM/S Sanuar Enterprise\tBDR0000110\tNURPUR ROAD
+B003\tM/S Sanuar Enterprise\tBDR0000111\tPATER BUG
+B003\tM/S Sanuar Enterprise\tBDR0000112\tR K MISHION 1
+B003\tM/S Sanuar Enterprise\tBDR0000113\tR K MISHON 2
+B003\tM/S Sanuar Enterprise\tBDR0000114\tRAYER BAG
+B003\tM/S Sanuar Enterprise\tBDR0000115\tROSULPUR
+B003\tM/S Sanuar Enterprise\tBDR0000116\tSATISH SARKAR
+B003\tM/S Sanuar Enterprise\tBDR0000117\tSHAMPUR
+B003\tM/S Sanuar Enterprise\tBDR0000118\tSHEIKHDI
+B003\tM/S Sanuar Enterprise\tBDR0000119\tSHOHID FARUK ROAD
+B003\tM/S Sanuar Enterprise\tBDR0000120\tUTTOR JATRA BARI
+B003\tM/S Sanuar Enterprise\tBDR0000121\tWASHA ROAD
+B003\tM/S Sanuar Enterprise\tBDR0000122\tZIA SHORONI
+B003\tM/S Sanuar Enterprise\tBDR0000123\tZURAIN
+B004\tM/S Hasan Brothers Corporation\tBDR0000170\tBECHARAM DEWRY
+B004\tM/S Hasan Brothers Corporation\tBDR0000171\tBEGUM BAZAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000172\tTAZMOHOL TOWER
+B004\tM/S Hasan Brothers Corporation\tBDR0000173\tMOWLANA MARKET
+B004\tM/S Hasan Brothers Corporation\tBDR0000174\tASRAFABAAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000175\tKAPTAN BAZAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000176\tKAZI ALAUDDIN ROAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000177\tKHOLAMORA
+B004\tM/S Hasan Brothers Corporation\tBDR0000178\tMITFORD
+B004\tM/S Hasan Brothers Corporation\tBDR0000179\tNAYA BAZAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000180\tSTATION ROAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000181\tTATI BAZAR ROAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000182\tGONOK TULI
+B004\tM/S Hasan Brothers Corporation\tBDR0000183\tLALBAG-URDUROAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000184\tMODDHO RASULPUR
+B004\tM/S Hasan Brothers Corporation\tBDR0000185\tNAWABGANJ
+B004\tM/S Hasan Brothers Corporation\tBDR0000186\tAMLIGOLA
+B004\tM/S Hasan Brothers Corporation\tBDR0000187\tRAY SHAHEB BAZAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000188\tRONI MARKET
+B004\tM/S Hasan Brothers Corporation\tBDR0000189\tSECTION
+B004\tM/S Hasan Brothers Corporation\tBDR0000190\tKOILARGHAT
+B004\tM/S Hasan Brothers Corporation\tBDR0000191\tJHAWCHAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000192\tKELLAR MORE
+B004\tM/S Hasan Brothers Corporation\tBDR0000193\tPOLASHI
+B004\tM/S Hasan Brothers Corporation\tBDR0000194\tSHAHID NAGAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000195\tAJIMPUR
+B004\tM/S Hasan Brothers Corporation\tBDR0000196\tBONOLOTA KACHA BAZAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000197\tNEELKHET
+B004\tM/S Hasan Brothers Corporation\tBDR0000198\tNEW MARKET
+B004\tM/S Hasan Brothers Corporation\tBDR0000199\tNEW SUPER MARKET
+B004\tM/S Hasan Brothers Corporation\tBDR0000200\tBORO GRAM
+B004\tM/S Hasan Brothers Corporation\tBDR0000201\tDAYAGONJ BAZAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000202\tFARASGONJ ROAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000203\tISLAM BAGH
+B004\tM/S Hasan Brothers Corporation\tBDR0000204\tMALITOLA ROAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000205\tNAZIM UDDIN ROAD
+B004\tM/S Hasan Brothers Corporation\tBDR0000206\tSUTRAPUR BAZAR
+B004\tM/S Hasan Brothers Corporation\tBDR0000207\tNARINDA
+B004\tM/S Hasan Brothers Corporation\tBDR0000208\tWARI
+B006\tParagon Marketing Limited\tBDR0000351\tRUPNAGAR
+B006\tParagon Marketing Limited\tBDR0000352\tMIRPUR 12 B AND C
+B006\tParagon Marketing Limited\tBDR0000353\tBISHIL
+B006\tParagon Marketing Limited\tBDR0000354\tKALLYANPUR NOTUN BAZ
+B006\tParagon Marketing Limited\tBDR0000355\tGUDARAGHAT
+B006\tParagon Marketing Limited\tBDR0000356\tDOHS
+B006\tParagon Marketing Limited\tBDR0000357\tKALSHI
+B006\tParagon Marketing Limited\tBDR0000358\tDIYA BARI AND KAUNDI
+B006\tParagon Marketing Limited\tBDR0000359\tPALLABI
+B006\tParagon Marketing Limited\tBDR0000360\tALOBDI
+B006\tParagon Marketing Limited\tBDR0000361\tEASTERN HOUSING
+B006\tParagon Marketing Limited\tBDR0000362\tKAZIPARA WEST AND MO
+B006\tParagon Marketing Limited\tBDR0000363\tMOLLA MARKET
+B006\tParagon Marketing Limited\tBDR0000364\tSTADIUM ROAD
+B006\tParagon Marketing Limited\tBDR0000365\tMANIKDI
+B006\tParagon Marketing Limited\tBDR0000366\tVASAN TEK
+B006\tParagon Marketing Limited\tBDR0000367\tSHEWRAPARA EAST
+B006\tParagon Marketing Limited\tBDR0000368\tSHEWRAPARA WEST
+B006\tParagon Marketing Limited\tBDR0000369\tKAFRUL
+B006\tParagon Marketing Limited\tBDR0000370\tKACHUKHET
+B006\tParagon Marketing Limited\tBDR0000371\tBNP BAZAR
+B006\tParagon Marketing Limited\tBDR0000372\tTALTOLA
+B006\tParagon Marketing Limited\tBDR0000373\tMIRPUR 11
+B006\tParagon Marketing Limited\tBDR0000374\tIBRAHIMPUR
+B006\tParagon Marketing Limited\tBDR0000375\tSENPARA
+B006\tParagon Marketing Limited\tBDR0000376\tBALU GHAT
+B006\tParagon Marketing Limited\tBDR0000377\tPIRER BAG AND AMTOLA
+B006\tParagon Marketing Limited\tBDR0000378\tSHAH ALI BAG
+B006\tParagon Marketing Limited\tBDR0000379\tMIRPUR 14
+B006\tParagon Marketing Limited\tBDR0000380\tMATIKATA
+B006\tParagon Marketing Limited\tBDR0000381\tJANATA HOUSING
+B006\tParagon Marketing Limited\tBDR0000382\tSONALI BAZAR
+B006\tParagon Marketing Limited\tBDR0000383\tTOLARBAG
+B006\tParagon Marketing Limited\tBDR0000384\tMIRPUR 6 BAZAR
+B006\tParagon Marketing Limited\tBDR0000385\tZOO ROAD
+B006\tParagon Marketing Limited\tBDR0000386\tKALLYANPUR MAIN ROAD
+B006\tParagon Marketing Limited\tBDR0000387\tDARUS SALAM
+B006\tParagon Marketing Limited\tBDR0000388\tPUROBI MARKET
+B006\tParagon Marketing Limited\tBDR0000389\tMUSLIM BAZAR
+B006\tParagon Marketing Limited\tBDR0000390\tMAZAR ROAD 2
+B006\tParagon Marketing Limited\tBDR0000391\tBOROBAG
+B006\tParagon Marketing Limited\tBDR0000392\tMAZAR ROAD 1
+B006\tParagon Marketing Limited\tBDR0000393\tAHMED NAGAR
+B006\tParagon Marketing Limited\tBDR0000394\tGABTOLI
+B006\tParagon Marketing Limited\tBDR0000395\tMIRPUR A
+B006\tParagon Marketing Limited\tBDR0000396\tMIRPUR C
+B006\tParagon Marketing Limited\tBDR0000397\tMODDHO PAIKPARA
+B006\tParagon Marketing Limited\tBDR0000398\tMIRPUR 12 D AND E
+B006\tParagon Marketing Limited\tBDR0000399\tSHYAMOLI
+B006\tParagon Marketing Limited\tBDR0000400\tKAZIPARA EAST
+B006\tParagon Marketing Limited\tBDR0000401\tFAKIR BARI AND MIRPU
+B006\tParagon Marketing Limited\tBDR0000402\tMIRPUR 13
+B006\tParagon Marketing Limited\tBDR0000403\tPOLASHNAGAR AND BAWN
+B006\tParagon Marketing Limited\tBDR0000404\tBENAROSHI AND AVENUE
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000124\tNOBODOY HOUSING
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000125\tCHANDRIMA HOUSING
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000126\tBOU BAZAR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000127\tHATIR PUL
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000128\tDHAKA UDDAN
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000129\tKOLABAGAN
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000130\tLALMATIA
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000131\tSUKRABAD
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000132\tKATASHUR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000133\tBOSILA
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000134\tCENTRAL ROAD - 1
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000135\tCENTRAL ROAD - 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000136\tHAZARIBAG
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000137\tSEKHER TEK 1
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000138\tSEKHER TEK 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000139\tHAZARIBAG 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000140\tMETRO HOUSING
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000141\tKRISHI MARKET
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000142\tJIGATOLA
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000143\tNURJAHAN ROAD
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000144\tADABOR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000145\tRAYER BAZAR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000146\tDHANMONDI 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000147\tGREEN ROAD 1
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000148\tGREEN ROAD 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000149\tBASH BARI ROAD
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000150\tKRISHI MARKET 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000151\tMONSURABAD
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000152\tRAYER BAZAR 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000153\tELEPHANT ROAD
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000154\tCAMP BAZAR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000155\tSHANKAR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000156\tMONIPURI PARA
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000157\tCOLLEGE GATE
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000158\tTAJMOHOL ROAD
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000159\tCAMP OUTER
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000160\tJAFORABAD
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000161\tKATHAL BAGAN
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000162\tSHYAMOLI
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000163\tDHANMONDI 1
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000164\tEAST RAZA BAZAR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000165\tHOUSING LIMITED
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000166\tTOWN HALL 1
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000167\tTOWN HALL 2
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000168\tWEST RAJA BAZAR
+B007\tM/S Hasan Brothers Corporation 2\tBDR0000169\tHOUSING 2
+B008\tSelf Tech Marketing Ltd\tBDR0000405\tSECTOR 9
+B008\tSelf Tech Marketing Ltd\tBDR0000406\tSECTOR 7
+B008\tSelf Tech Marketing Ltd\tBDR0000407\tAZAMPUR
+B008\tSelf Tech Marketing Ltd\tBDR0000408\tGAWAIR
+B008\tSelf Tech Marketing Ltd\tBDR0000409\tDIA BARI
+B008\tSelf Tech Marketing Ltd\tBDR0000410\tDAKKHIN KHAN
+B008\tSelf Tech Marketing Ltd\tBDR0000411\tISAPURA
+B008\tSelf Tech Marketing Ltd\tBDR0000412\tARICHPUR
+B008\tSelf Tech Marketing Ltd\tBDR0000413\tSECTOR 13
+B008\tSelf Tech Marketing Ltd\tBDR0000414\tSECTOR 10
+B008\tSelf Tech Marketing Ltd\tBDR0000415\tFAYDABAD
+B008\tSelf Tech Marketing Ltd\tBDR0000416\tKHILKHET 1
+B008\tSelf Tech Marketing Ltd\tBDR0000417\tKAMARPARA 1
+B008\tSelf Tech Marketing Ltd\tBDR0000418\tKAMARPARA 2
+B008\tSelf Tech Marketing Ltd\tBDR0000419\tSECTOR 4, 6 & BDR BA
+B008\tSelf Tech Marketing Ltd\tBDR0000420\tST. ROAD,MODHU MITA
+B008\tSelf Tech Marketing Ltd\tBDR0000421\tSECTOR 11 A
+B008\tSelf Tech Marketing Ltd\tBDR0000422\tKUSHOL CENTRE
+B008\tSelf Tech Marketing Ltd\tBDR0000423\tJOYNAL MARKET
+B008\tSelf Tech Marketing Ltd\tBDR0000424\tBAWNIA BAZAR
+B008\tSelf Tech Marketing Ltd\tBDR0000425\tNIKUNJO
+B008\tSelf Tech Marketing Ltd\tBDR0000426\tTONGI BAZAR 1
+B008\tSelf Tech Marketing Ltd\tBDR0000427\tMIL GATE, T&T
+B008\tSelf Tech Marketing Ltd\tBDR0000428\tJOHORA MARKET
+B008\tSelf Tech Marketing Ltd\tBDR0000429\tASHKONA 1
+B008\tSelf Tech Marketing Ltd\tBDR0000430\tASHKONA 2
+B008\tSelf Tech Marketing Ltd\tBDR0000431\tKAWLA
+B008\tSelf Tech Marketing Ltd\tBDR0000432\tKHILKHET 2
+B008\tSelf Tech Marketing Ltd\tBDR0000433\tJHINU MARKET
+B008\tSelf Tech Marketing Ltd\tBDR0000434\tFOKIR MARKET
+B008\tSelf Tech Marketing Ltd\tBDR0000435\tTONGI BAZAR 2
+B008\tSelf Tech Marketing Ltd\tBDR0000436\tKOSHAI BARI
+B008\tSelf Tech Marketing Ltd\tBDR0000437\tFARID MARKET
+B008\tSelf Tech Marketing Ltd\tBDR0000438\tSHA-KABIR MAZAR
+B008\tSelf Tech Marketing Ltd\tBDR0000439\tSECTOR 11 B
+B008\tSelf Tech Marketing Ltd\tBDR0000440\tDOLIPARA
+B008\tSelf Tech Marketing Ltd\tBDR0000441\tSECTOR 12
+B008\tSelf Tech Marketing Ltd\tBDR0000442\tHELAL MARKET
+B008\tSelf Tech Marketing Ltd\tBDR0000443\tTONGI BOU BAZAR
+B008\tSelf Tech Marketing Ltd\tBDR0000444\tJAMAI BAZAR
+B009\tARC Trading\tBDR0000209\tALKARAN ROAD
+B009\tARC Trading\tBDR0000210\tASHRAF ALI ROAD
+B009\tARC Trading\tBDR0000211\tBONGSAL ROAD
+B009\tARC Trading\tBDR0000212\tDC ROAD
+B009\tARC Trading\tBDR0000213\tKAZIR DEWRI
+B009\tARC Trading\tBDR0000214\tKHATUNGONJ
+B009\tARC Trading\tBDR0000215\tMAJHIR GHAT
+B009\tARC Trading\tBDR0000216\tMIA KHAN NAGAR
+B009\tARC Trading\tBDR0000217\tSIRAJUDDOWLA
+B009\tARC Trading\tBDR0000218\tKALAMIA BAZAR
+B009\tARC Trading\tBDR0000219\tDC ROAD 2
+B009\tARC Trading\tBDR0000220\tCHAWKBAZAR
+B009\tARC Trading\tBDR0000221\tBAHAR MARKET
+B009\tARC Trading\tBDR0000222\tBOXIR HAT
+B009\tARC Trading\tBDR0000223\tCHAKTAI
+B009\tARC Trading\tBDR0000224\tPARAMOUNT CITY
+B009\tARC Trading\tBDR0000225\tREAZ UDDIN BAZAR
+B009\tARC Trading\tBDR0000226\tTAMAKUMUNDI LANE
+B009\tARC Trading\tBDR0000227\tBOXIR HAT (2)
+B009\tARC Trading\tBDR0000228\tREAZ UDDIN BAZAR 2
+B009\tARC Trading\tBDR0000229\tCOMMERCE COLLEGE ROA
+B009\tARC Trading\tBDR0000230\tENAYET BAZAR
+B009\tARC Trading\tBDR0000231\tJAMAL KHAN
+B009\tARC Trading\tBDR0000232\tPATHANTULI
+B009\tARC Trading\tBDR0000233\tMADAR BARI
+B009\tARC Trading\tBDR0000234\tASKAR DIGHI
+B009\tARC Trading\tBDR0000235\tNALA PARA
+B009\tARC Trading\tBDR0000236\tCHITTAGONG COLLEGE R
+B009\tARC Trading\tBDR0000237\tCOMMERCE COLLEGE ROA
+B009\tARC Trading\tBDR0000238\tPATHANTULI 2
+B009\tARC Trading\tBDR0000239\tPATHANTULI 3
+B009\tARC Trading\tBDR0000571\tSAMT CHANNEL
+B010\tM/S Farid Enterprise\tBDR0000273\tCHANDINA
+B010\tM/S Farid Enterprise\tBDR0000274\tNEW MARKET
+B010\tM/S Farid Enterprise\tBDR0000275\tYEASIN MARKET
+B010\tM/S Farid Enterprise\tBDR0000276\tNAZRUL AVENUE
+B010\tM/S Farid Enterprise\tBDR0000277\tRAJGANJ 2
+B010\tM/S Farid Enterprise\tBDR0000278\tRAJGANJ 1
+B010\tM/S Farid Enterprise\tBDR0000279\tPOLICE LINE
+B010\tM/S Farid Enterprise\tBDR0000280\tBANGLABAZAR
+B010\tM/S Farid Enterprise\tBDR0000281\tBRAHMANPARA
+B010\tM/S Farid Enterprise\tBDR0000282\tEPZ
+B010\tM/S Farid Enterprise\tBDR0000283\tLALMAI
+B010\tM/S Farid Enterprise\tBDR0000284\tMIYAR BAZAR
+B010\tM/S Farid Enterprise\tBDR0000285\tRANIR BAZAR
+B010\tM/S Farid Enterprise\tBDR0000286\tKAPTAN BAZAR
+B010\tM/S Farid Enterprise\tBDR0000287\tBURICHONG
+B010\tM/S Farid Enterprise\tBDR0000288\tTOMSOM BRIDGE
+B010\tM/S Farid Enterprise\tBDR0000289\tCANTONMENT
+B010\tM/S Farid Enterprise\tBDR0000290\tCOURTBARI
+B010\tM/S Farid Enterprise\tBDR0000291\tMEDICAL ROAD
+B010\tM/S Farid Enterprise\tBDR0000292\tNIMSHAR
+B010\tM/S Farid Enterprise\tBDR0000293\tBISSWA ROAD
+B010\tM/S Farid Enterprise\tBDR0000294\tCHAWK BAZAR
+B010\tM/S Farid Enterprise\tBDR0000295\tMADHAYA
+B012\tP M Traders\tBDR0000445\tANONDIPUR
+B012\tP M Traders\tBDR0000446\tASKARABAD
+B012\tP M Traders\tBDR0000447\tBDR MATH
+B012\tP M Traders\tBDR0000448\tI-BLOCK
+B012\tP M Traders\tBDR0000449\tJHARNA PARA
+B012\tP M Traders\tBDR0000450\tPC ROAD
+B012\tP M Traders\tBDR0000451\tRONGIPARA
+B012\tP M Traders\tBDR0000452\tSHANTIBAG
+B012\tP M Traders\tBDR0000453\tAGRABAD
+B012\tP M Traders\tBDR0000454\tKORNOPHULI
+B012\tP M Traders\tBDR0000455\tA-BLOCK
+B012\tP M Traders\tBDR0000456\tALANGKAR
+B012\tP M Traders\tBDR0000457\tANONDO BAZAR
+B012\tP M Traders\tBDR0000458\tBEPARI PARA
+B012\tP M Traders\tBDR0000459\tDEWANHAT
+B012\tP M Traders\tBDR0000460\tEID GAH
+B012\tP M Traders\tBDR0000461\tFOILLATOLI BAZAR
+B012\tP M Traders\tBDR0000462\tNOYA BAZAR
+B012\tP M Traders\tBDR0000463\tPAHARTOLI COLLEGE RO
+B012\tP M Traders\tBDR0000464\tSABUJBAG
+B012\tP M Traders\tBDR0000465\tSAGORIKA ROAD
+B013\tMadina Traders\tBDR0000466\tBARRISTER COLLEGE
+B013\tMadina Traders\tBDR0000467\tCONTROL MORE
+B013\tMadina Traders\tBDR0000468\tLABOUR COLONY
+B013\tMadina Traders\tBDR0000469\tMAILER MATHA
+B013\tMadina Traders\tBDR0000470\tNOAPARA
+B013\tMadina Traders\tBDR0000471\tPORT MARKET
+B013\tMadina Traders\tBDR0000472\tAIRPORT ROAD
+B013\tMadina Traders\tBDR0000473\tAKMAL ALI
+B013\tMadina Traders\tBDR0000474\tCEMENT CROSSING
+B013\tMadina Traders\tBDR0000475\tGUARD ROOM
+B013\tMadina Traders\tBDR0000476\tKOLSHIR DIGHIR PAR
+B013\tMadina Traders\tBDR0000477\tSTEEL MILL
+B014\tUnitrust Trading Co.\tBDR0000478\tFOKIRAPUL 1
+B014\tUnitrust Trading Co.\tBDR0000479\tFOKIRAPUL 2
+B014\tUnitrust Trading Co.\tBDR0000480\tMOGBAZAR 1
+B014\tUnitrust Trading Co.\tBDR0000481\tNOYA POLTON
+B014\tUnitrust Trading Co.\tBDR0000482\tPURAN POLTON
+B014\tUnitrust Trading Co.\tBDR0000483\tRAMPURA BONOSRI 2
+B014\tUnitrust Trading Co.\tBDR0000484\tSANTIBAG
+B014\tUnitrust Trading Co.\tBDR0000485\tSANTINAGAR
+B014\tUnitrust Trading Co.\tBDR0000486\tGORAN 1
+B014\tUnitrust Trading Co.\tBDR0000487\tGORAN 2
+B014\tUnitrust Trading Co.\tBDR0000488\tBONOSREE 1
+B014\tUnitrust Trading Co.\tBDR0000489\tE BLOCK
+B014\tUnitrust Trading Co.\tBDR0000490\tGULBAG
+B014\tUnitrust Trading Co.\tBDR0000491\tKALIBARI
+B014\tUnitrust Trading Co.\tBDR0000492\tMADERTEK
+B014\tUnitrust Trading Co.\tBDR0000493\tRAMPURA 2
+B014\tUnitrust Trading Co.\tBDR0000494\tSIDDHESHORI 1
+B014\tUnitrust Trading Co.\tBDR0000495\tWAPDA
+B014\tUnitrust Trading Co.\tBDR0000496\tMANDA 1
+B014\tUnitrust Trading Co.\tBDR0000497\tMANDA 2
+B014\tUnitrust Trading Co.\tBDR0000498\tBONOSREE 2
+B014\tUnitrust Trading Co.\tBDR0000499\tDOKKHIN MUGDA
+B014\tUnitrust Trading Co.\tBDR0000500\tKODOMTOLA
+B014\tUnitrust Trading Co.\tBDR0000501\tMODHUBAG
+B014\tUnitrust Trading Co.\tBDR0000502\tMOGBAZAR 2
+B014\tUnitrust Trading Co.\tBDR0000503\tNANDI PARA 1
+B014\tUnitrust Trading Co.\tBDR0000504\tNANDI PARA 2
+B014\tUnitrust Trading Co.\tBDR0000505\tNORTH MUGDA
+B014\tUnitrust Trading Co.\tBDR0000506\tRAMPURA 1
+B014\tUnitrust Trading Co.\tBDR0000507\tULON
+B014\tUnitrust Trading Co.\tBDR0000508\tBASHABO 1
+B014\tUnitrust Trading Co.\tBDR0000509\tHAZIPARA
+B014\tUnitrust Trading Co.\tBDR0000510\tKOMOLAPUR
+B014\tUnitrust Trading Co.\tBDR0000511\tMAYAKANON
+B014\tUnitrust Trading Co.\tBDR0000512\tNOYATOLA
+B014\tUnitrust Trading Co.\tBDR0000513\tSIPAHI BAG 1
+B014\tUnitrust Trading Co.\tBDR0000514\tB BLOCK 1
+B014\tUnitrust Trading Co.\tBDR0000515\tB BLOCK 2
+B014\tUnitrust Trading Co.\tBDR0000516\tC BLOCK 1
+B014\tUnitrust Trading Co.\tBDR0000517\tC BLOCK 2
+B014\tUnitrust Trading Co.\tBDR0000518\tBASHABO 2
+B014\tUnitrust Trading Co.\tBDR0000519\tKHILGAON
+B014\tUnitrust Trading Co.\tBDR0000520\tMALIBAG
+B014\tUnitrust Trading Co.\tBDR0000521\tSIDDHESHORI 2
+B014\tUnitrust Trading Co.\tBDR0000522\tTALTOLA
+B014\tUnitrust Trading Co.\tBDR0000523\tVUIYAPARA
+B014\tUnitrust Trading Co.\tBDR0000524\tMERADIA 1
+B014\tUnitrust Trading Co.\tBDR0000525\tMERADIA 2
+B014\tUnitrust Trading Co.\tBDR0000526\tAGB
+B014\tUnitrust Trading Co.\tBDR0000527\tCHAMELIBAG
+B014\tUnitrust Trading Co.\tBDR0000528\tESKATON
+B014\tUnitrust Trading Co.\tBDR0000529\tRAMPURA BONOSRI 1
+B014\tUnitrust Trading Co.\tBDR0000530\tSHAJAHANPUR
+B014\tUnitrust Trading Co.\tBDR0000531\tSHEGUNBAGICHA
+B014\tUnitrust Trading Co.\tBDR0000532\tTILPA PARA
+B015\tNext Associates\tBDR0000533\t2 NO GATE
+B015\tNext Associates\tBDR0000534\tATURAR DEPOT
+B015\tNext Associates\tBDR0000535\tOXYGEN
+B015\tNext Associates\tBDR0000536\tCOLONEL HUT
+B015\tNext Associates\tBDR0000537\tHIGH LEVEL ROAD
+B015\tNext Associates\tBDR0000538\tSHAHID NAGAR
+B015\tNext Associates\tBDR0000539\tFOUJDARHAT
+B015\tNext Associates\tBDR0000540\tPANCHLAISH
+B015\tNext Associates\tBDR0000541\tPOLYTECHNIC
+B015\tNext Associates\tBDR0000542\tAKBAR SHAH ROAD
+B015\tNext Associates\tBDR0000543\tAL FALAH GOLI
+B015\tNext Associates\tBDR0000544\tBIBIRHAT
+B015\tNext Associates\tBDR0000545\tCHAND MIAH ROAD
+B015\tNext Associates\tBDR0000546\tZAKIR HOSSAIN ROAD
+B015\tNext Associates\tBDR0000547\tRAHATTARPOL
+B015\tNext Associates\tBDR0000548\tFIROZ SHA ABASHIK
+B015\tNext Associates\tBDR0000549\tMOHAMMADPUR
+B015\tNext Associates\tBDR0000550\tBANGLABAZAR
+B015\tNext Associates\tBDR0000551\tSHER SHA
+B015\tNext Associates\tBDR0000552\tGEC
+B015\tNext Associates\tBDR0000553\tKAZIR HAT
+B015\tNext Associates\tBDR0000554\tLALKHAN BAZAR
+B015\tNext Associates\tBDR0000555\tMEDICAL ROAD
+B015\tNext Associates\tBDR0000556\tPAHARTOLI 1
+B015\tNext Associates\tBDR0000557\tPAHARTOLI 2
+B015\tNext Associates\tBDR0000558\tCOSMOPOLITON
+B015\tNext Associates\tBDR0000559\tHAMJARBAG
+B015\tNext Associates\tBDR0000560\tMIRJARPOL
+B015\tNext Associates\tBDR0000561\tMOULOBIBAZAR
+B015\tNext Associates\tBDR0000562\tAMBAGAN
+B015\tNext Associates\tBDR0000563\tBAHADDARHAT
+B015\tNext Associates\tBDR0000564\tARKAN ROAD
+B015\tNext Associates\tBDR0000565\tKHAZA ROAD
+B015\tNext Associates\tBDR0000566\tCHANDGAON RESIDENTIA
+B015\tNext Associates\tBDR0000567\tK B AMAN ALI ROAD
+B015\tNext Associates\tBDR0000568\tBISWA COLONY
+B015\tNext Associates\tBDR0000569\tROSULBAG
+B015\tNext Associates\tBDR0000570\tCNB`;
+
+        // Process Data
+        const db = {};
+        const lines = rawData.split('\n');
         
-        // Register the DataLabels plugin
-        Chart.register(ChartDataLabels);
+        lines.forEach(line => {
+            const parts = line.trim().split('\t');
+            if (parts.length >= 4) {
+                const distCode = parts[0];
+                const distName = parts[1];
+                const routeCode = parts[2];
+                const routeName = parts[3];
 
-        const timeElapsedPercent = 80.77; // Benchmark updated to (21/26 days)
-        const LAC_DIVISOR = 100000;
-        
-        // Object to track current selections
-        let selectedFilters = {
-            'Area': 'All Areas',
-            'Territory': 'All Territories',
-            'DB Name': 'All DBs'
-        };
-        
-        let activeTab = 'territory'; // To track current tab state
-        let activeTrendFilter = 'MTD'; // Track trend filter state
-        let globalSttRatio = 1; // Global ratio for trend chart scaling
-        
-        // Global references to filter <select> elements
-        let areaSelect, territorySelect, dbNameSelect;
-
-        function parseNumeric(value) {
-            if (typeof value === 'number') {
-                return value;
-            }
-            if (typeof value === 'string') {
-                // Remove commas, percentage signs, and then convert to float
-                const cleanedValue = value.replace(/,/g, '').replace(/%/g, '');
-                const number = parseFloat(cleanedValue);
-                return isNaN(number) ? 0 : number;
-            }
-            return 0;
-        }
-
-        function calculatePercentages(data) {
-            data.sttAchPercent = (data.sttTgt > 0) ? (data.sttAch / data.sttTgt) * 100 : 0;
-            data.ercAchPercent = (data.ercTgt > 0) ? (data.ercAch / data.ercTgt) * 100 : 0;
-            data.sfTbrAchPercent = (data.sfTbrTgt > 0) ? (data.sfTbrAch / data.sfTbrTgt) * 100 : 0;
-            data.premiumSkuAchPercent = (data.premiumSkuGoal > 0) ? (data.premiumSkuAch / data.premiumSkuGoal) * 100 : 0;
-            return data;
-        }
-
-        function getRAGStatus(percentage) {
-            const benchmarkHigh = timeElapsedPercent * 0.90;
-            const benchmarkLow = timeElapsedPercent * 0.85;
-            
-            if (percentage >= benchmarkHigh) { 
-                return { color: 'fill-green', text: 'Green', ring: 'ring-green', textColor: 'text-green' };
-            } else if (percentage >= benchmarkLow) { 
-                return { color: 'fill-amber', text: 'Amber', ring: 'ring-amber', textColor: 'text-amber' };
-            } else { 
-                return { color: 'fill-red', text: 'Red', ring: 'ring-red', textColor: 'text-red' };
-            }
-        }
-
-        function formatInLac(amount) {
-            return (amount / LAC_DIVISOR).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function formatCount(amount) {
-            const roundedAmount = Math.round(amount);
-            return roundedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 });
-        }
-        
-        function formatValue(value, unit) {
-            if (unit === "Lac") { 
-                return formatInLac(value);
-            }
-            return formatCount(value);
-        }
-
-        function calculateGrandTotals(dataArray) {
-            const totals = {
-                sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0, 
-                sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
-            };
-
-            dataArray.forEach(data => {
-                for (const key in totals) {
-                    const val = parseNumeric(data[key]);
-                    if (!isNaN(val)) {
-                         totals[key] += val;
-                    }
+                if (!db[distCode]) {
+                    db[distCode] = {
+                        name: distName,
+                        routes: []
+                    };
                 }
-            });
-
-            totals.sttAchPercent = (totals.sttTgt > 0) ? (totals.sttAch / totals.sttTgt) * 100 : 0;
-            totals.ercAchPercent = (totals.ercTgt > 0) ? (totals.ercAch / totals.ercTgt) * 100 : 0;
-            totals.sfTbrAchPercent = (totals.sfTbrTgt > 0) ? (totals.sfTbrAch / totals.sfTbrTgt) * 100 : 0;
-            totals.premiumSkuAchPercent = (totals.premiumSkuGoal > 0) ? (totals.premiumSkuAch / totals.premiumSkuGoal) * 100 : 0;
-            
-            return totals;
-        }
-
-        // Main initialization within DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            let comboChartInstance = null;
-            let globalSttAch = 0;
-            
-            // --- CHART DATA (NEW DATA from User Input) ---
-            const dailyRawData = [
-                { calday: "11/1/2025", sales: 132114, erc: 97 },
-                { calday: "11/1/2025", sales: 111705, erc: 95 },
-                { calday: "11/1/2025", sales: 65085, erc: 76 },
-                { calday: "11/1/2025", sales: 144001, erc: 75 },
-                { calday: "11/1/2025", sales: 111531, erc: 96 },
-                { calday: "11/1/2025", sales: 90511, erc: 78 },
-                { calday: "11/1/2025", sales: 24876, erc: 35 },
-                { calday: "11/1/2025", sales: 31507, erc: 49 },
-                { calday: "11/1/2025", sales: 4761, erc: 10 },
-                { calday: "11/1/2025", sales: 24163, erc: 25 },
-                { calday: "11/1/2025", sales: 105561, erc: 100 },
-                { calday: "11/2/2025", sales: 133991, erc: 76 },
-                { calday: "11/2/2025", sales: 63887, erc: 75 },
-                { calday: "11/2/2025", sales: 82901, erc: 86 },
-                { calday: "11/2/2025", sales: 168944, erc: 102 },
-                { calday: "11/2/2025", sales: 105672, erc: 95 },
-                { calday: "11/2/2025", sales: 88311, erc: 93 },
-                { calday: "11/2/2025", sales: 47947, erc: 54 },
-                { calday: "11/2/2025", sales: 27196, erc: 36 },
-                { calday: "11/2/2025", sales: 38872, erc: 68 },
-                { calday: "11/2/2025", sales: 19022, erc: 32 },
-                { calday: "11/2/2025", sales: 112934, erc: 96 },
-                { calday: "11/3/2025", sales: 209434, erc: 125 },
-                { calday: "11/3/2025", sales: 65015, erc: 74 },
-                { calday: "11/3/2025", sales: 109248, erc: 124 },
-                { calday: "11/3/2025", sales: 210592, erc: 103 },
-                { calday: "11/3/2025", sales: 185713, erc: 133 },
-                { calday: "11/3/2025", sales: 117540, erc: 118 },
-                { calday: "11/3/2025", sales: 58802, erc: 77 },
-                { calday: "11/3/2025", sales: 30469, erc: 59 },
-                { calday: "11/3/2025", sales: 58208, erc: 93 },
-                { calday: "11/3/2025", sales: 40018, erc: 53 },
-                { calday: "11/3/2025", sales: 133703, erc: 136 },
-                { calday: "11/4/2025", sales: 125357, erc: 101 },
-                { calday: "11/4/2025", sales: 75146, erc: 84 },
-                { calday: "11/4/2025", sales: 68927, erc: 97 },
-                { calday: "11/4/2025", sales: 100283, erc: 126 },
-                { calday: "11/4/2025", sales: 101937, erc: 111 },
-                { calday: "11/4/2025", sales: 105745, erc: 129 },
-                { calday: "11/4/2025", sales: 62987, erc: 70 },
-                { calday: "11/4/2025", sales: 33650, erc: 58 },
-                { calday: "11/4/2025", sales: 31265, erc: 48 },
-                { calday: "11/4/2025", sales: 168910, erc: 160 },
-                { calday: "11/5/2025", sales: 138305, erc: 105 },
-                { calday: "11/5/2025", sales: 73654, erc: 80 },
-                { calday: "11/5/2025", sales: 87476, erc: 59 },
-                { calday: "11/5/2025", sales: 221169, erc: 112 },
-                { calday: "11/5/2025", sales: 141646, erc: 112 },
-                { calday: "11/5/2025", sales: 137031, erc: 121 },
-                { calday: "11/5/2025", sales: 78350, erc: 65 },
-                { calday: "11/5/2025", sales: 57025, erc: 111 },
-                { calday: "11/5/2025", sales: 37164, erc: 57 },
-                { calday: "11/5/2025", sales: 25699, erc: 36 },
-                { calday: "11/5/2025", sales: 134100, erc: 184 },
-                { calday: "11/6/2025", sales: 125278, erc: 119 },
-                { calday: "11/6/2025", sales: 85071, erc: 108 },
-                { calday: "11/6/2025", sales: 53742, erc: 77 },
-                { calday: "11/6/2025", sales: 134128, erc: 71 },
-                { calday: "11/6/2025", sales: 110420, erc: 109 },
-                { calday: "11/6/2025", sales: 331019, erc: 90 },
-                { calday: "11/6/2025", sales: 76939, erc: 73 },
-                { calday: "11/6/2025", sales: 23929, erc: 29 },
-                { calday: "11/6/2025", sales: 45062, erc: 76 },
-                { calday: "11/6/2025", sales: 37053, erc: 27 },
-                { calday: "11/6/2025", sales: 109273, erc: 221 },
-                { calday: "11/7/2025", sales: -135416, erc: 114 },
-                { calday: "11/7/2025", sales: 97542, erc: 162 },
-                { calday: "11/10/2025", sales: 578132, erc: 320 },
-                { calday: "11/10/2025", sales: 545434, erc: 50 },
-                { calday: "11/10/2025", sales: 132756, erc: 78 },
-                { calday: "11/10/2025", sales: 306316, erc: 118 },
-                { calday: "11/10/2025", sales: 60513, erc: 61 },
-                { calday: "11/10/2025", sales: 494475, erc: 173 },
-                { calday: "11/10/2025", sales: 103588, erc: 150 },
-                { calday: "11/10/2025", sales: 293340, erc: 269 },
-                { calday: "11/11/2025", sales: 249505, erc: 179 },
-                { calday: "11/11/2025", sales: 450206, erc: 146 },
-                { calday: "11/11/2025", sales: 54290, erc: 75 },
-                { calday: "11/11/2025", sales: 135889, erc: 88 },
-                { calday: "11/11/2025", sales: 61509, erc: 90 },
-                { calday: "11/11/2025", sales: 272737, erc: 302 },
-                { calday: "11/11/2025", sales: 31668, erc: 43 },
-                { calday: "11/11/2025", sales: 48535, erc: 55 },
-                { calday: "11/11/2025", sales: 50115, erc: 93 },
-                { calday: "11/11/2025", sales: 193440, erc: 184 },
-                { calday: "11/11/2025", sales: 379489, erc: 309 },
-                { calday: "11/12/2025", sales: 105109, erc: 175 },
-                { calday: "11/12/2025", sales: 103667, erc: 99 },
-                { calday: "11/12/2025", sales: 135502, erc: 126 },
-                { calday: "11/12/2025", sales: 147030, erc: 98 },
-                { calday: "11/12/2025", sales: 137435, erc: 99 },
-                { calday: "11/12/2025", sales: 114506, erc: 113 },
-                { calday: "11/12/2025", sales: 59509, erc: 62 },
-                { calday: "11/12/2025", sales: 9987, erc: 17 },
-                { calday: "11/12/2025", sales: 34265, erc: 45 },
-                { calday: "11/12/2025", sales: 29549, erc: 33 },
-                { calday: "11/12/2025", sales: 63880, erc: 188 },
-                { calday: "11/13/2025", sales: 122096, erc: 168 },
-                { calday: "11/13/2025", sales: 76040, erc: 84 },
-                { calday: "11/13/2025", sales: 45030, erc: 56 },
-                { calday: "11/13/2025", sales: 236186, erc: 119 },
-                { calday: "11/13/2025", sales: 93668, erc: 102 },
-                { calday: "11/13/2025", sales: 159791, erc: 107 },
-                { calday: "11/13/2025", sales: 47584, erc: 46 },
-                { calday: "11/13/2025", sales: 15398, erc: 14 },
-                { calday: "11/13/2025", sales: 36982, erc: 50 },
-                { calday: "11/13/2025", sales: 21283, erc: 19 },
-                { calday: "11/13/2025", sales: 76001, erc: 138 },
-                { calday: "11/14/2025", sales: 13699, erc: 19 },
-                { calday: "11/14/2025", sales: -3336, erc: 11 },
-                { calday: "11/15/2025", sales: 109591, erc: 87 },
-                { calday: "11/15/2025", sales: 80453, erc: 84 },
-                { calday: "11/15/2025", sales: 84210, erc: 87 },
-                { calday: "11/15/2025", sales: 216815, erc: 135 },
-                { calday: "11/15/2025", sales: 182743, erc: 116 },
-                { calday: "11/15/2025", sales: 79946, erc: 110 },
-                { calday: "11/15/2025", sales: 42115, erc: 25 },
-                { calday: "11/15/2025", sales: 84075, erc: 139 },
-                { calday: "11/15/2025", sales: 26133, erc: 44 },
-                { calday: "11/15/2025", sales: 48420, erc: 60 },
-                { calday: "11/15/2025", sales: 90729, erc: 90 },
-                { calday: "11/16/2025", sales: 162528, erc: 109 },
-                { calday: "11/16/2025", sales: 95359, erc: 101 },
-                { calday: "11/16/2025", sales: 52592, erc: 118 },
-                { calday: "11/16/2025", sales: 113770, erc: 75 },
-                { calday: "11/16/2025", sales: 80155, erc: 98 },
-                { calday: "11/16/2025", sales: 118409, erc: 117 },
-                { calday: "11/16/2025", sales: 80727, erc: 114 },
-                { calday: "11/16/2025", sales: 40234, erc: 47 },
-                { calday: "11/16/2025", sales: 14142, erc: 20 },
-                { calday: "11/16/2025", sales: 27496, erc: 41 },
-                { calday: "11/16/2025", sales: 81679, erc: 90 },
-                { calday: "11/16/2025", sales: 0, erc: 2 },
-                { calday: "11/17/2025", sales: 156557, erc: 128 },
-                { calday: "11/17/2025", sales: 77130, erc: 85 },
-                { calday: "11/17/2025", sales: 278416, erc: 100 },
-                { calday: "11/17/2025", sales: 185584, erc: 99 },
-                { calday: "11/17/2025", sales: 88619, erc: 76 },
-                { calday: "11/17/2025", sales: 90810, erc: 114 },
-                { calday: "11/17/2025", sales: 43195, erc: 22 },
-                { calday: "11/17/2025", sales: 55401, erc: 77 },
-                { calday: "11/17/2025", sales: 31730, erc: 39 },
-                { calday: "11/17/2025", sales: 34324, erc: 45 },
-                { calday: "11/17/2025", sales: 167048, erc: 158 },
-                { calday: "11/18/2025", sales: 97863, erc: 135 },
-                { calday: "11/18/2025", sales: 87328, erc: 118 },
-                { calday: "11/18/2025", sales: 45177, erc: 60 },
-                { calday: "11/18/2025", sales: 228917, erc: 139 },
-                { calday: "11/18/2025", sales: 110496, erc: 92 },
-                { calday: "11/18/2025", sales: 75250, erc: 83 },
-                { calday: "11/18/2025", sales: 36575, erc: 16 },
-                { calday: "11/18/2025", sales: 68464, erc: 98 },
-                { calday: "11/18/2025", sales: 24066, erc: 19 },
-                { calday: "11/18/2025", sales: 18043, erc: 24 },
-                { calday: "11/18/2025", sales: 179085, erc: 127 },
-                { calday: "11/19/2025", sales: 104332, erc: 101 },
-                { calday: "11/19/2025", sales: 74019, erc: 81 },
-                { calday: "11/19/2025", sales: 50476, erc: 71 },
-                { calday: "11/19/2025", sales: 729437, erc: 99 },
-                { calday: "11/19/2025", sales: 93258, erc: 89 },
-                { calday: "11/19/2025", sales: 100875, erc: 95 },
-                { calday: "11/19/2025", sales: 113792, erc: 119 },
-                { calday: "11/19/2025", sales: 34879, erc: 53 },
-                { calday: "11/19/2025", sales: 24455, erc: 30 },
-                { calday: "11/19/2025", sales: 9310, erc: 14 },
-                { calday: "11/19/2025", sales: 211898, erc: 179 },
-                { calday: "11/19/2025", sales: 16774, erc: 14 },
-                { calday: "11/20/2025", sales: 125845, erc: 154 },
-                { calday: "11/20/2025", sales: 83913, erc: 104 },
-                { calday: "11/20/2025", sales: -496779, erc: 86 },
-                { calday: "11/20/2025", sales: 132661, erc: 87 },
-                { calday: "11/20/2025", sales: 48561, erc: 55 },
-                { calday: "11/20/2025", sales: 97987, erc: 72 },
-                { calday: "11/20/2025", sales: 36850, erc: 51 },
-                { calday: "11/20/2025", sales: 23062, erc: 14 },
-                { calday: "11/20/2025", sales: 47779, erc: 42 },
-                { calday: "11/20/2025", sales: 98585, erc: 125 },
-                { calday: "11/20/2025", sales: 66252, erc: 59 },
-                { calday: "11/21/2025", sales: -8566, erc: 10 },
-                { calday: "11/21/2025", sales: 71543, erc: 31 },
-                { calday: "11/22/2025", sales: 102610, erc: 181 },
-                { calday: "11/22/2025", sales: 172172, erc: 152 },
-                { calday: "11/22/2025", sales: 517380, erc: 86 },
-                { calday: "11/22/2025", sales: 598889, erc: 556 },
-                { calday: "11/22/2025", sales: 174602, erc: 87 },
-                { calday: "11/22/2025", sales: 111854, erc: 66 },
-                { calday: "11/22/2025", sales: 68634, erc: 52 },
-                { calday: "11/22/2025", sales: 36157, erc: 43 },
-                { calday: "11/22/2025", sales: 12398, erc: 11 },
-                { calday: "11/22/2025", sales: 29283, erc: 31 },
-                { calday: "11/22/2025", sales: 104886, erc: 165 },
-                { calday: "11/22/2025", sales: 828111, erc: 654 },
-                { calday: "11/23/2025", sales: 204945, erc: 140 },
-                { calday: "11/23/2025", sales: 91939, erc: 69 },
-                { calday: "11/23/2025", sales: 63620, erc: 84 },
-                { calday: "11/23/2025", sales: 123894, erc: 68 },
-                { calday: "11/23/2025", sales: 98327, erc: 89 },
-                { calday: "11/23/2025", sales: 153799, erc: 110 },
-                { calday: "11/23/2025", sales: 104441, erc: 94 },
-                { calday: "11/23/2025", sales: 28739, erc: 29 },
-                { calday: "11/23/2025", sales: 21358, erc: 28 },
-                { calday: "11/23/2025", sales: 21292, erc: 39 },
-                { calday: "11/23/2025", sales: 63252, erc: 106 },
-                { calday: "11/23/2025", sales: -806625, erc: 671 },
-                { calday: "11/24/2025", sales: 70665, erc: 193 },
-                { calday: "11/24/2025", sales: 96655, erc: 76 },
-                { calday: "11/24/2025", sales: 94150, erc: 71 },
-                { calday: "11/24/2025", sales: 171292, erc: 136 },
-                { calday: "11/24/2025", sales: 227760, erc: 111 },
-                { calday: "11/24/2025", sales: 113792, erc: 91 },
-                { calday: "11/24/2025", sales: 68031, erc: 71 },
-                { calday: "11/24/2025", sales: 37825, erc: 36 },
-                { calday: "11/24/2025", sales: 16460, erc: 10 },
-                { calday: "11/24/2025", sales: 50406, erc: 53 },
-                { calday: "11/24/2025", sales: 70927, erc: 144 },
-                { calday: "11/24/2025", sales: 78136, erc: 96 }
-            ];
-
-            // NEW RAW DATASET (Updated from user input)
-            const rawSrData = [
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550,000", mtdAch: "437,549", ercTgt: "426", ercAch: "370", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "43", premiumSkuAch: "44" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700,000", mtdAch: "658,561", ercTgt: "437", ercAch: "341", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "43", premiumSkuAch: "24" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000021", dffName: "Miraz", sttTgt: "4,270,000", mtdAch: "321,133", ercTgt: "187", ercAch: "5", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "0", premiumSkuAch: "0" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "630,000", mtdAch: "613,872", ercTgt: "396", ercAch: "289", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "43", premiumSkuAch: "18" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580,000", mtdAch: "486,453", ercTgt: "447", ercAch: "430", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "43", premiumSkuAch: "47" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "690,000", mtdAch: "473,869", ercTgt: "313", ercAch: "333", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "44", premiumSkuAch: "42" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "690,000", mtdAch: "470,099", ercTgt: "420", ercAch: "368", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "40" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "760,000", mtdAch: "628,860", ercTgt: "445", ercAch: "415", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "59" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "680,000", mtdAch: "488,716", ercTgt: "260", ercAch: "276", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "50" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "740,000", mtdAch: "482,924", ercTgt: "318", ercAch: "328", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "48" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000054", dffName: "Nasim", sttTgt: "510,000", mtdAch: "241,698", ercTgt: "376", ercAch: "132", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "44", premiumSkuAch: "5" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "1,050,000", mtdAch: "702,600", ercTgt: "456", ercAch: "400", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "17" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1,050,000", mtdAch: "916,025", ercTgt: "475", ercAch: "198", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "45", premiumSkuAch: "19" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "800,000", mtdAch: "300,123", ercTgt: "341", ercAch: "155", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "2" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850,000", mtdAch: "459,433", ercTgt: "352", ercAch: "232", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "4" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1,240,000", mtdAch: "786,259", ercTgt: "350", ercAch: "229", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "11" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000060", dffName: "Limon", sttTgt: "850,000", mtdAch: "265,748", ercTgt: "350", ercAch: "143", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "11" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "629,000", mtdAch: "558,674", ercTgt: "320", ercAch: "328", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "49" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "634,000", mtdAch: "349,788", ercTgt: "381", ercAch: "367", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "42" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "832,000", mtdAch: "661,087", ercTgt: "320", ercAch: "320", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "40" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "812,000", mtdAch: "684,440", ercTgt: "350", ercAch: "305", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "42" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "521,000", mtdAch: "117,009", ercTgt: "329", ercAch: "134", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "1" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "730,000", mtdAch: "376,605", ercTgt: "358", ercAch: "321", sfTbrTgt: "100", sfTbrAch: "9", premiumSkuGoal: "45", premiumSkuAch: "35" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "776,000", mtdAch: "329,583", ercTgt: "388", ercAch: "258", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "40", premiumSkuAch: "26" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "817,000", mtdAch: "449,065", ercTgt: "383", ercAch: "343", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "41", premiumSkuAch: "37" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "723,000", mtdAch: "529,782", ercTgt: "408", ercAch: "454", sfTbrTgt: "100", sfTbrAch: "12", premiumSkuGoal: "44", premiumSkuAch: "40" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "868,000", mtdAch: "399,606", ercTgt: "271", ercAch: "277", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "35", premiumSkuAch: "30" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "873,000", mtdAch: "560,637", ercTgt: "292", ercAch: "243", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "55", premiumSkuAch: "53" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1,085,000", mtdAch: "614,476", ercTgt: "369", ercAch: "343", sfTbrTgt: "100", sfTbrAch: "8", premiumSkuGoal: "69", premiumSkuAch: "67" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "723,000", mtdAch: "466,864", ercTgt: "408", ercAch: "402", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "60", premiumSkuAch: "3" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "922,000", mtdAch: "715,465", ercTgt: "353", ercAch: "345", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "85", premiumSkuAch: "85" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "649,000", mtdAch: "475,673", ercTgt: "429", ercAch: "441", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "34" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1,030,000", mtdAch: "651,496", ercTgt: "341", ercAch: "336", sfTbrTgt: "100", sfTbrAch: "15", premiumSkuGoal: "66", premiumSkuAch: "7" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888,000", mtdAch: "436,899", ercTgt: "394", ercAch: "271", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "11" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655,000", mtdAch: "436,931", ercTgt: "382", ercAch: "215", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "24" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645,000", mtdAch: "373,483", ercTgt: "382", ercAch: "289", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "33" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634,000", mtdAch: "327,293", ercTgt: "360", ercAch: "234", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "4" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581,000", mtdAch: "304,840", ercTgt: "381", ercAch: "177", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "13" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000166", dffName: "Delowar Hossain", sttTgt: "565,000", mtdAch: "31,496", ercTgt: "320", ercAch: "264", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000167", dffName: "Ismail Hossain", sttTgt: "450,000", mtdAch: "48,978", ercTgt: "381", ercAch: "264", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000168", dffName: "Mehedi Alam", sttTgt: "466,000", mtdAch: "60,977", ercTgt: "320", ercAch: "256", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000169", dffName: "Niloy Sarker", sttTgt: "460,000", mtdAch: "30,349", ercTgt: "350", ercAch: "25", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000170", dffName: "Probal Mallik", sttTgt: "560,000", mtdAch: "10,850", ercTgt: "329", ercAch: "9", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "580,000", mtdAch: "261,743", ercTgt: "360", ercAch: "327", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "50", premiumSkuAch: "16" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "420,000", mtdAch: "159,575", ercTgt: "364", ercAch: "260", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "0" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "430,000", mtdAch: "245,351", ercTgt: "313", ercAch: "252", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "30", premiumSkuAch: "0" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "640,000", mtdAch: "446,344", ercTgt: "507", ercAch: "410", sfTbrTgt: "100", sfTbrAch: "16", premiumSkuGoal: "55", premiumSkuAch: "4" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1,600,000", mtdAch: "811,243", ercTgt: "320", ercAch: "173", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "25", premiumSkuAch: "0" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "580,000", mtdAch: "381,046", ercTgt: "473", ercAch: "490", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "55", premiumSkuAch: "19" },
-                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540,000", mtdAch: "318,969", ercTgt: "329", ercAch: "287", sfTbrTgt: "100", sfTbrAch: "19", premiumSkuGoal: "30", premiumSkuAch: "15" },
-                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460,000", mtdAch: "314,167", ercTgt: "361", ercAch: "338", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "13" },
-                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "460,000", mtdAch: "351,458", ercTgt: "299", ercAch: "284", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "30", premiumSkuAch: "21" },
-                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "540,000", mtdAch: "356,387", ercTgt: "302", ercAch: "278", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "48" }
-            ];
-
-            const fullSrData = rawSrData.map(sr => {
-                const newSr = {};
-                newSr.area = sr.area;
-                newSr.territory = sr.territory;
-                newSr.tm = sr.tm;
-                newSr.lead = sr.lead;
-                newSr.dhCode = sr.dhCode; 
-                newSr.dhName = sr.dhName;
-                newSr.dffCode = sr.dffCode;
-                newSr.dffName = sr.dffName;
-                
-                newSr.sttTgt = parseNumeric(sr.sttTgt);
-                newSr.sttAch = parseNumeric(sr.mtdAch);
-                
-                newSr.ercTgt = parseNumeric(sr.ercTgt);
-                newSr.ercAch = parseNumeric(sr.ercAch);
-                
-                newSr.sfTbrTgt = parseNumeric(sr.sfTbrTgt);
-                newSr.sfTbrAch = parseNumeric(sr.sfTbrAch); 
-                
-                newSr.premiumSkuGoal = parseNumeric(sr.premiumSkuGoal);
-                newSr.premiumSkuAch = parseNumeric(sr.premiumSkuAch); 
-
-                return newSr;
-            });
-
-            let processedTerritoryData = [];
-            let processedDbData = [];
-            
-            function preProcessData() {
-                const nationallySortedSrs = [...fullSrData].map(item => calculatePercentages(item)).sort((a, b) => b.sttAchPercent - a.sttAchPercent);
-                nationallySortedSrs.forEach((sr, index) => {
-                    sr.nationalRank = index + 1;
-                });
-                
-                const territoryMap = new Map();
-                fullSrData.forEach(sr => {
-                    const key = sr.territory;
-                    if (!territoryMap.has(key)) {
-                        territoryMap.set(key, {
-                            territory: sr.territory,
-                            tm: sr.tm,
-                            area: sr.area,
-                            sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
-                            sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
-                        });
-                    }
-                    const territory = territoryMap.get(key);
-                    territory.sttTgt += sr.sttTgt;
-                    territory.sttAch += sr.sttAch;
-                    territory.ercTgt += sr.ercTgt;
-                    territory.ercAch += sr.ercAch;
-                    territory.sfTbrTgt += sr.sfTbrTgt;
-                    territory.sfTbrAch += sr.sfTbrAch;
-                    territory.premiumSkuGoal += sr.premiumSkuGoal;
-                    territory.premiumSkuAch += sr.premiumSkuAch;
-                });
-                
-                const dbMap = new Map();
-                fullSrData.forEach(sr => {
-                    const key = sr.dhName;
-                    if (!dbMap.has(key)) {
-                        dbMap.set(key, {
-                            dhName: sr.dhName,
-                            area: sr.area,
-                            territory: sr.territory,
-                            sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
-                            sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
-                        });
-                    }
-                    const db = dbMap.get(key);
-                    db.sttTgt += sr.sttTgt;
-                    db.sttAch += sr.sttAch;
-                    db.ercTgt += sr.ercTgt;
-                    db.ercAch += sr.ercAch;
-                    db.sfTbrTgt += sr.sfTbrTgt;
-                    db.sfTbrAch += sr.sfTbrAch;
-                    db.premiumSkuGoal += sr.premiumSkuGoal;
-                    db.premiumSkuAch += sr.premiumSkuAch;
-                });
-
-                processedTerritoryData = Array.from(territoryMap.values());
-                processedDbData = Array.from(dbMap.values());
-                
-                processedTerritoryData.forEach(item => calculatePercentages(item));
-                processedDbData.forEach(item => calculatePercentages(item));
-            }
-
-            function getAggregatedDailyData() {
-                const aggMap = new Map();
-                
-                dailyRawData.forEach(row => {
-                    const dateObj = new Date(row.calday);
-                    const dateKey = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }); 
-                    const rawDate = row.calday;
-
-                    if (!aggMap.has(rawDate)) {
-                        aggMap.set(rawDate, { date: rawDate, label: dateKey, sales: 0, erc: 0 });
-                    }
-                    const entry = aggMap.get(rawDate);
-                    entry.sales += row.sales;
-                    entry.erc += row.erc;
-                });
-
-                const sortedData = Array.from(aggMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                // Return array of objects with Date object for filtering
-                return sortedData.map(d => ({
-                    dateObj: new Date(d.date),
-                    label: d.label,
-                    sales: d.sales / LAC_DIVISOR, 
-                    erc: d.erc
-                }));
-            }
-            
-            function filterTrendData(data, filterType) {
-                if (filterType === 'L3D') {
-                    return data.slice(-3);
-                }
-                if (filterType === 'W1') {
-                    return data.filter(d => d.dateObj.getDate() >= 1 && d.dateObj.getDate() <= 7);
-                }
-                if (filterType === 'W2') {
-                    return data.filter(d => d.dateObj.getDate() >= 8 && d.dateObj.getDate() <= 14);
-                }
-                if (filterType === 'W3') {
-                    return data.filter(d => d.dateObj.getDate() >= 15 && d.dateObj.getDate() <= 21);
-                }
-                if (filterType === 'W4') {
-                    return data.filter(d => d.dateObj.getDate() >= 22);
-                }
-                // Default to MTD (all data)
-                return data;
-            }
-
-            function populateDateWiseChart(ratio = 1, filterType = 'MTD') {
-                const ctx = document.getElementById('comboChart');
-                if (!ctx) return; 
-
-                let chartDataRaw = getAggregatedDailyData();
-                
-                // Apply Time Range Filter
-                chartDataRaw = filterTrendData(chartDataRaw, filterType);
-
-                // Extract arrays for Chart.js
-                const labels = chartDataRaw.map(d => {
-                    const dayName = d.dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                    return `${d.label} (${dayName})`;
-                });
-
-                // Determine colors based on day of week (Friday = 5)
-                const barBackgroundColors = chartDataRaw.map(d => {
-                    return d.dateObj.getDay() === 5 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(17, 153, 142, 0.7)'; // Red for Friday
-                });
-                
-                const barBorderColors = chartDataRaw.map(d => {
-                    return d.dateObj.getDay() === 5 ? 'rgba(220, 38, 38, 1)' : 'rgba(17, 153, 142, 1)';
-                });
-
-                const scaledSales = chartDataRaw.map(d => d.sales * ratio);
-                const scaledErc = chartDataRaw.map(d => Math.round(d.erc * ratio));
-
-                if (comboChartInstance) {
-                    comboChartInstance.destroy();
-                }
-
-                comboChartInstance = new Chart(ctx, {
-                    type: 'bar', 
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'ERC Ach', 
-                                data: scaledErc,
-                                type: 'line',
-                                borderColor: '#6a0dad', 
-                                backgroundColor: '#6a0dad',
-                                borderWidth: 3,
-                                tension: 0.4,
-                                yAxisID: 'y1',
-                                order: 1,
-                                datalabels: {
-                                    align: 'top',
-                                    anchor: 'start',
-                                    color: '#6a0dad',
-                                    font: {
-                                        weight: 'bold',
-                                        size: 11
-                                    },
-                                    offset: 4
-                                }
-                            },
-                            {
-                                label: 'Sales (Lac)', 
-                                data: scaledSales,
-                                type: 'bar',
-                                backgroundColor: barBackgroundColors, 
-                                borderColor: barBorderColors,
-                                borderWidth: 1,
-                                borderRadius: 4,
-                                yAxisID: 'y',
-                                order: 2,
-                                datalabels: {
-                                    align: 'end',
-                                    anchor: 'end',
-                                    color: '#0d7a71', 
-                                    font: {
-                                        weight: 'bold',
-                                        size: 10
-                                    },
-                                    formatter: function(value) {
-                                        return value.toFixed(2);
-                                    }
-                                }
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 25
-                            }
-                        },
-                        plugins: {
-                            tooltip: { mode: 'index', intersect: false },
-                            legend: { position: 'bottom' },
-                            datalabels: {
-                                display: true,
-                                clip: false
-                            }
-                        },
-                        scales: {
-                            x: { 
-                                display: true, 
-                                title: { display: true, text: 'Date' },
-                                ticks: { maxRotation: 45, minRotation: 45 }
-                            },
-                            y: { 
-                                type: 'linear', display: true, position: 'left', 
-                                title: { display: true, text: 'Sales (Lac)' },
-                                grid: { drawOnChartArea: true },
-                                grace: '10%' 
-                            },
-                            y1: { 
-                                type: 'linear', display: true, position: 'right', 
-                                title: { display: true, text: 'ERC Ach (Count)' },
-                                grid: { drawOnChartArea: false },
-                                grace: '10%' 
-                            }
-                        }
-                    }
+                db[distCode].routes.push({
+                    code: routeCode,
+                    name: routeName
                 });
             }
-
-            function applyFilters() {
-                let filteredTerritories = [...processedTerritoryData];
-                let filteredDbs = [...processedDbData];
-                let filteredSrs = [...fullSrData];
-
-                if (selectedFilters.Area !== 'All Areas') {
-                    filteredSrs = filteredSrs.filter(data => data.area === selectedFilters.Area);
-                }
-                if (selectedFilters.Territory !== 'All Territories') {
-                    filteredSrs = filteredSrs.filter(data => data.territory === selectedFilters.Territory);
-                }
-                if (selectedFilters['DB Name'] !== 'All DBs') {
-                    filteredSrs = filteredSrs.filter(data => data.dhName === selectedFilters['DB Name']);
-                }
-                
-                const activeTerritories = new Set(filteredSrs.map(sr => sr.territory));
-                const activeDbNames = new Set(filteredSrs.map(sr => sr.dhName));
-                
-                filteredTerritories = processedTerritoryData.filter(t => activeTerritories.has(t.territory));
-                filteredDbs = processedDbData.filter(db => activeDbNames.has(db.dhName));
-
-                let dataForKpiTotals = filteredSrs; 
-                
-                const totals = calculateGrandTotals(dataForKpiTotals);
-                const newKpiData = updateKpiData(totals);
-
-                populateKpiCards(newKpiData);
-                populateTable('territory-list', filteredTerritories, 'territory', 'tm');
-                populateTable('db-list', filteredDbs, 'dhName', 'territory');
-                populateTable('sr-list', filteredSrs, 'dffName', 'dhName', true); 
-                
-                populateTerritoryChart(filteredTerritories);
-                populateDbChart(filteredDbs);
-                populateTopBottomSrCharts(filteredSrs);
-                
-                updateSrStatus(filteredSrs); 
-                updateDbStatus(filteredDbs); 
-
-                let currentSttTotal = totals.sttAch; 
-                
-                if (globalSttAch > 0) {
-                    globalSttRatio = currentSttTotal / globalSttAch;
-                } else {
-                    globalSttRatio = 1;
-                }
-                // Use global ratio and currently active trend filter
-                populateDateWiseChart(globalSttRatio, activeTrendFilter);
-            }
-
-            function initializeTrendButtons() {
-                const buttons = document.querySelectorAll('.trend-btn');
-                buttons.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        // Remove active class from all
-                        buttons.forEach(b => b.classList.remove('active'));
-                        // Add active to clicked
-                        btn.classList.add('active');
-                        // Set current filter state
-                        activeTrendFilter = btn.getAttribute('data-filter');
-                        // Update chart using stored ratio
-                        populateDateWiseChart(globalSttRatio, activeTrendFilter);
-                    });
-                });
-            }
-
-            function initializeFilters() {
-                const filterControls = document.getElementById('filter-controls');
-                filterControls.innerHTML = '';
-                
-                const areas = [...new Set(fullSrData.map(item => item.area))];
-                const territories = [...new Set(fullSrData.map(item => item.territory))];
-                const dbNames = [...new Set(fullSrData.map(item => item.dhName))];
-                
-                const dynamicFilterOptions = {
-                    'Area': ['All Areas', ...areas.sort()],
-                    'Territory': ['All Territories', ...territories.sort()],
-                    'DB Name': ['All DBs', ...dbNames.sort()]
-                };
-
-                const areaDropdown = createFilterDropdown('Area', dynamicFilterOptions['Area']);
-                areaSelect = areaDropdown.select;
-                
-                const territoryDropdown = createFilterDropdown('Territory', dynamicFilterOptions['Territory']);
-                territorySelect = territoryDropdown.select;
-
-                const dbNameDropdown = createFilterDropdown('DB Name', dynamicFilterOptions['DB Name']);
-                dbNameSelect = dbNameDropdown.select;
-
-                filterControls.appendChild(areaDropdown.wrapper);
-                filterControls.appendChild(territoryDropdown.wrapper);
-                filterControls.appendChild(dbNameDropdown.wrapper);
-            }
-            
-            function updateDependentFilters(changedFilterName) {
-                let availableSrs = [...fullSrData];
-
-                if (selectedFilters.Area !== 'All Areas') {
-                    availableSrs = availableSrs.filter(sr => sr.area === selectedFilters.Area);
-                }
-
-                const availableTerritories = ['All Territories', ...new Set(availableSrs.map(item => item.territory).sort())];
-                
-                if (changedFilterName === 'Area') {
-                    populateSelectWithOptions(territorySelect, availableTerritories, 'Territory');
-                    selectedFilters.Territory = territorySelect.value; 
-                }
-
-                let availableSrsForDb = [...availableSrs]; 
-                if (selectedFilters.Territory !== 'All Territories') {
-                    availableSrsForDb = availableSrsForDb.filter(sr => sr.territory === selectedFilters.Territory);
-                }
-
-                const availableDbNames = ['All DBs', ...new Set(availableSrsForDb.map(item => item.dhName).sort())];
-
-                if (changedFilterName === 'Area' || changedFilterName === 'Territory') {
-                    populateSelectWithOptions(dbNameSelect, availableDbNames, 'DB Name');
-                    selectedFilters['DB Name'] = dbNameSelect.value; 
-                }
-            }
-
-            function createFilterDropdown(filterName, options) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'flex flex-col text-sm';
-
-                const label = document.createElement('label');
-                label.textContent = filterName;
-                const filterId = `filter-${filterName.replace(/\s/g, '')}`;
-                label.htmlFor = filterId;
-                label.className = 'text-xs font-semibold text-gray-200 mb-1 pl-1'; 
-                
-                const select = document.createElement('select');
-                select.id = filterId;
-                select.className = 'py-2 px-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white cursor-pointer transition-all duration-150';
-                
-                populateSelectWithOptions(select, options, filterName);
-
-                select.addEventListener('change', (event) => {
-                    const selectedValue = event.target.value;
-                    selectedFilters[filterName] = selectedValue;
-                    updateDependentFilters(filterName);
-                    applyFilters(); 
-                });
-                
-                wrapper.appendChild(label);
-                wrapper.appendChild(select);
-
-                return { wrapper, select };
-            }
-
-            function populateSelectWithOptions(selectElement, optionsArray, currentFilterKey) {
-                const currentSelectedValue = selectedFilters[currentFilterKey];
-                selectElement.innerHTML = ''; 
-
-                optionsArray.forEach(optionText => {
-                    const option = document.createElement('option');
-                    option.value = optionText;
-                    option.textContent = optionText;
-                    selectElement.appendChild(option);
-                });
-
-                if (optionsArray.includes(currentSelectedValue)) {
-                    selectElement.value = currentSelectedValue;
-                } else {
-                    selectElement.value = optionsArray[0]; 
-                    selectedFilters[currentFilterKey] = selectElement.value;
-                }
-            }
-            
-            function initializeTabs() {
-                const tabTerritory = document.getElementById('tab-territory');
-                const tabDb = document.getElementById('tab-db');
-                const tabSr = document.getElementById('tab-sr');
-                
-                const panelTerritory = document.getElementById('panel-territory');
-                const panelDb = document.getElementById('panel-db');
-                const panelSr = document.getElementById('panel-sr');
-                
-                const visualsMain = document.getElementById('visuals-panel-main');
-                const visualsSr = document.getElementById('visuals-panel-sr');
-                
-                const chartTerritory = document.getElementById('territory-chart-container');
-                const chartDb = document.getElementById('db-chart-container');
-                
-                tabTerritory.addEventListener('click', () => {
-                    activeTab = 'territory';
-                    tabTerritory.classList.add('tab-active');
-                    tabTerritory.classList.remove('tab-inactive');
-                    tabDb.classList.add('tab-inactive');
-                    tabDb.classList.remove('tab-active');
-                    tabSr.classList.add('tab-inactive');
-                    tabSr.classList.remove('tab-active');
-                    panelTerritory.style.display = 'block';
-                    panelDb.style.display = 'none';
-                    panelSr.style.display = 'none';
-                    visualsMain.style.display = 'grid';
-                    visualsSr.style.display = 'none';
-                    chartTerritory.style.display = 'block';
-                    chartDb.style.display = 'none';
-                    applyFilters();
-                });
-                
-                tabDb.addEventListener('click', () => {
-                    activeTab = 'db';
-                    tabTerritory.classList.remove('tab-active');
-                    tabTerritory.classList.add('tab-inactive');
-                    tabDb.classList.remove('tab-inactive');
-                    tabDb.classList.add('tab-active');
-                    tabSr.classList.add('tab-inactive');
-                    tabSr.classList.remove('tab-active');
-                    panelTerritory.style.display = 'none';
-                    panelDb.style.display = 'block';
-                    panelSr.style.display = 'none';
-                    visualsMain.style.display = 'grid';
-                    visualsSr.style.display = 'none';
-                    chartTerritory.style.display = 'none';
-                    chartDb.style.display = 'block';
-                    applyFilters();
-                });
-                
-                tabSr.addEventListener('click', () => {
-                    activeTab = 'sr';
-                    tabTerritory.classList.remove('tab-active');
-                    tabTerritory.classList.add('tab-inactive');
-                    tabDb.classList.remove('tab-active');
-                    tabDb.classList.add('tab-inactive');
-                    tabSr.classList.remove('tab-inactive');
-                    tabSr.classList.add('tab-active');
-                    panelTerritory.style.display = 'none';
-                    panelDb.style.display = 'none';
-                    panelSr.style.display = 'block';
-                    visualsMain.style.display = 'none';
-                    visualsSr.style.display = 'grid';
-                    applyFilters();
-                });
-            }
-
-            function updateKpiData(totals) {
-                const kpiTotalSTT = totals.sttAchPercent;
-                const kpiTotalERC = totals.ercAchPercent;
-                const kpiTotalTBRTgt = totals.sfTbrTgt;
-                const kpiTotalTBRAch = totals.sfTbrAch; 
-                const kpiTotalPSKUACHPercent = totals.premiumSkuAchPercent;
-                
-                const newKpiData = {
-                    timeElapsed: {
-                        label: "Time Elapsed", 
-                        percentage: timeElapsedPercent,
-                        valueText: "21 out of 26 Working Days Passed", 
-                        rag: { color: 'fill-blue', border: 'border-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' },
-                        isBenchmark: true
-                    },
-                    mtdStt: {
-                        label: "MTD STT Ach", 
-                        percentage: kpiTotalSTT, 
-                        unit: "Lac",
-                        target: totals.sttTgt, 
-                        achieved: totals.sttAch, 
-                        rag: null, 
-                        actualValue: kpiTotalSTT.toFixed(2) + "%"
-                    },
-                    mtdErc: {
-                        label: "MTD ERC Ach", 
-                        percentage: kpiTotalERC,
-                        unit: "Stores",
-                        target: totals.ercTgt, 
-                        achieved: totals.ercAch, 
-                        rag: null, 
-                        actualValue: kpiTotalERC.toFixed(2) + "%"
-                    },
-                    sfTbr: {
-                        label: "SF TBR Vol.", 
-                        percentage: (kpiTotalTBRTgt > 0) ? (kpiTotalTBRAch / kpiTotalTBRTgt) * 100 : 0, 
-                        unit: "TBRs",
-                        target: kpiTotalTBRTgt, 
-                        achieved: kpiTotalTBRAch, 
-                        rag: null,
-                        actualValue: formatCount(kpiTotalTBRAch) 
-                    },
-                    premiumTp: {
-                        label: "Premium TP Ach", 
-                        percentage: kpiTotalPSKUACHPercent,
-                        unit: "Stores",
-                        target: totals.premiumSkuGoal, 
-                        achieved: totals.premiumSkuAch, 
-                        rag: null, 
-                        actualValue: kpiTotalPSKUACHPercent.toFixed(2) + "%"
-                    }
-                };
-                newKpiData.mtdStt.rag = getRAGStatus(newKpiData.mtdStt.percentage);
-                newKpiData.mtdErc.rag = getRAGStatus(newKpiData.mtdErc.percentage);
-                newKpiData.sfTbr.rag = getRAGStatus(newKpiData.sfTbr.percentage);
-                newKpiData.premiumTp.rag = getRAGStatus(newKpiData.premiumTp.percentage);
-                
-                return newKpiData;
-            }
-
-            function createKpiCard(kpi) {
-                const rag = kpi.rag || getRAGStatus(kpi.percentage);
-                
-                let mainValue = kpi.actualValue;
-                let subContent = `<p class="text-sm text-gray-500 mt-2 font-medium">${kpi.valueText || ''}</p>`;
-                let mainValueClass = rag.textColor;
-                let comparisonText = ''; 
-
-                if (!kpi.isBenchmark) {
-                    const target = kpi.target;
-                    const achieved = kpi.achieved;
-                    const balance = target - achieved;
-                    const unit = kpi.unit;
-
-                    const fmtTarget = formatValue(target, unit);
-                    const fmtAchieved = formatValue(achieved, unit);
-                    const fmtBalance = formatValue(balance, unit);
-                    
-                    if (kpi.label.includes('MTD STT Ach') || kpi.label.includes('MTD ERC Ach') || kpi.label.includes('Premium TP Ach')) {
-                        const difference = kpi.percentage - timeElapsedPercent;
-                        let diffValue;
-                        let diffClass = difference < 0 ? 'text-red-600' : 'text-green-600';
-                        
-                        if (difference < 0) {
-                            diffValue = `-${Math.abs(difference).toFixed(2)}%`;
-                        } else {
-                            diffValue = `+${difference.toFixed(2)}%`;
-                        }
-
-                        comparisonText = `
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">vs. Time Elapsed (${timeElapsedPercent.toFixed(2)}%):</span>
-                                <span class="font-bold text-sm ${diffClass}">${diffValue}</span>
-                            </div>
-                        `;
-
-                        mainValue = kpi.percentage.toFixed(2) + '%'; 
-                        mainValueClass = rag.textColor; 
-                        
-                    } else if (kpi.label.includes('SF TBR Vol.')) { 
-                        mainValue = formatCount(achieved);
-                        mainValueClass = 'text-gray-800'; 
-                        rag.color = 'fill-gray-400';
-                        rag.ring = 'ring-gray-400';
-
-                    } else {
-                        mainValue = kpi.percentage.toFixed(2) + '%';
-                        mainValueClass = rag.textColor;
-                    }
-
-                    const displayUnit = unit === "Lac" ? "Lac" : "";
-
-                    let baseContent = ''; 
-
-                    if (kpi.label.includes('SF TBR Vol.')) {
-                        baseContent = `
-                            <!-- Achieved (Count) -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">Achieved:</span>
-                                <span class="font-bold text-sm text-gray-700">${fmtAchieved}</span>
-                            </div>
-                        `;
-                    } else {
-                        baseContent = `
-                            <!-- Target -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">TGT (${displayUnit}):</span>
-                                <span class="font-bold text-sm text-gray-700">${fmtTarget}</span>
-                            </div>
-                            <!-- Achieved -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">Achieved:</span>
-                                <span class="font-bold text-sm ${rag.textColor}">${fmtAchieved}</span>
-                            </div>
-                            <!-- Balance -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">Balance:</span>
-                                <span class="font-bold text-sm ${balance >= 0 ? 'text-gray-500' : 'text-red-500'}">${fmtBalance}</span>
-                            </div>
-                        `;
-                    }
-                    
-                    if (comparisonText) {
-                        subContent = `
-                            <div class="mt-3 pt-3 border-t border-gray-100 space-y-1 text-sm">
-                                ${comparisonText}
-                                <div class="space-y-1 pt-1 border-t border-gray-100">
-                                    ${baseContent}
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        subContent = `
-                            <div class="mt-3 pt-3 border-t border-gray-100 space-y-1 text-sm">
-                                ${baseContent}
-                            </div>
-                        `;
-                    }
-                    
-                } else {
-                    mainValue = kpi.percentage.toFixed(2) + '%';
-                    mainValueClass = 'text-blue';
-                }
-                
-                const cardHtml = `
-                    <div class="bg-white p-6 rounded-xl shadow-xl transition hover:shadow-2xl border border-gray-100 ${kpi.isBenchmark ? 'col-span-2 md:col-span-1' : ''}">
-                        
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-sm font-medium text-gray-500">${kpi.label}</p>
-                            <span class="w-3 h-3 rounded-full ${rag.color.replace('fill-', 'bg-')} ring-2 ring-offset-2 ${rag.ring}"></span>
-                        </div>
-
-                        <div class="text-3xl md:text-4xl font-extrabold mt-1 ${mainValueClass}">${mainValue}</div>
-                        
-                        <div class="gauge-meter mt-4 mb-3">
-                            <div class="gauge-fill ${rag.color}" style="width: ${Math.min(100, kpi.percentage).toFixed(2)}%"></div>
-                        </div>
-                        
-                        ${subContent}
-                    </div>
-                `;
-                return cardHtml;
-            }
-
-            function populateKpiCards(kpiData) {
-                const container = document.getElementById('kpi-cards');
-                container.innerHTML = '';
-                const orderedKeys = ['timeElapsed', 'mtdStt', 'mtdErc', 'sfTbr', 'premiumTp'];
-                orderedKeys.forEach(key => {
-                    const kpi = kpiData[key];
-                    if (kpi) {
-                        container.insertAdjacentHTML('beforeend', createKpiCard(kpi));
-                    }
-                });
-            }
-            
-            function populateTable(tableId, dataArray, keyForName, keyForSubtext, isSrTable = false) {
-                const tableBody = document.getElementById(tableId);
-                const table = tableBody.closest('table');
-                
-                let tfoot = table.querySelector('tfoot');
-                if (tfoot) tfoot.remove();
-
-                tableBody.innerHTML = ''; 
-
-                if (dataArray.length === 0) {
-                    const colspan = isSrTable ? "11" : "13";
-                    tableBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500 font-semibold text-lg">No data found for the selected filters.</td></tr>`;
-                    return;
-                }
-
-                dataArray
-                    .sort((a, b) => b.sttAchPercent - a.sttAchPercent) 
-                    .forEach(data => {
-                    data = calculatePercentages(data);
-                            
-                    const sttRag = getRAGStatus(data.sttAchPercent);
-                    const ercRag = getRAGStatus(data.ercAchPercent);
-                    const tbrRag = getRAGStatus(data.sfTbrAchPercent);
-                    const pskuRag = getRAGStatus(data.premiumSkuAchPercent);
-
-                    const getAchClass = (percentage) => getRAGStatus(percentage).textColor;
-                    
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition duration-150';
-                    
-                    if (isSrTable) {
-                        row.innerHTML = `
-                            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white shadow-sm z-10">
-                                ${data[keyForName]}
-                                <div class="text-xs text-gray-500">${data[keyForSubtext] || ''}</div>
-                            </td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatInLac(data.sttTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${sttRag.textColor}">${formatInLac(data.sttAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.sttAchPercent)}">${data.sttAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.ercTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${ercRag.textColor}">${formatCount(data.ercAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.ercAchPercent)}">${data.ercAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium text-gray-900">${formatCount(data.sfTbrAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.premiumSkuGoal)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${pskuRag.textColor}">${formatCount(data.premiumSkuAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.premiumSkuAchPercent)}">${data.premiumSkuAchPercent.toFixed(2)}%</td>
-                        `;
-                    } else {
-                        row.innerHTML = `
-                            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white shadow-sm z-10">
-                                ${data[keyForName]}
-                                <div class="text-xs text-gray-500">${data[keyForSubtext] || ''}</div>
-                            </td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatInLac(data.sttTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${sttRag.textColor}">${formatInLac(data.sttAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.sttAchPercent)}">${data.sttAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.ercTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${ercRag.textColor}">${formatCount(data.ercAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.ercAchPercent)}">${data.ercAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.sfTbrTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${tbrRag.textColor}">${formatCount(data.sfTbrAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.sfTbrAchPercent)}">${data.sfTbrAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.premiumSkuGoal)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${pskuRag.textColor}">${formatCount(data.premiumSkuAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.premiumSkuAchPercent)}">${data.premiumSkuAchPercent.toFixed(2)}%</td>
-                        `;
-                    }
-                    tableBody.appendChild(row);
-                });
-                
-                const grandTotals = calculateGrandTotals(dataArray);
-                tfoot = document.createElement('tfoot');
-                tfoot.className = 'bg-gray-100 border-t-2 border-gray-300';
-                
-                const totalRow = document.createElement('tr');
-                
-                const getAchClassForTotal = (percentage) => getRAGStatus(percentage).textColor;
-                
-                if (isSrTable) {
-                    totalRow.innerHTML = `
-                        <td class="px-3 py-3 whitespace-nowrap text-sm font-extrabold text-gray-900 sticky left-0 bg-gray-100 shadow-sm z-10">
-                            GRAND TOTAL (${dataArray.length} items)
-                        </td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatInLac(grandTotals.sttTgt)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatInLac(grandTotals.sttAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sttAchPercent)}">${grandTotals.sttAchPercent.toFixed(2)}%</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-700">${formatCount(grandTotals.ercTgt)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.ercAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.ercAchPercent)}">${grandTotals.ercAchPercent.toFixed(2)}%</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.sfTbrAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-700">${formatCount(grandTotals.premiumSkuGoal)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.premiumSkuAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.premiumSkuAchPercent)}">${grandTotals.premiumSkuAchPercent.toFixed(2)}%</td>
-                    `;
-                } else {
-                        totalRow.innerHTML = `
-                            <td class="px-3 py-3 whitespace-nowrap text-sm font-extrabold text-gray-900 sticky left-0 bg-gray-100 shadow-sm z-10">
-                                GRAND TOTAL (${dataArray.length} items)
-                            </td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatInLac(grandTotals.sttTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatInLac(grandTotals.sttAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sttAchPercent)}">${grandTotals.sttAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.ercTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.ercAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.ercAchPercent)}">${grandTotals.ercAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.sfTbrTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.sfTbrAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sfTbrAchPercent)}">${grandTotals.sfTbrAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.premiumSkuGoal)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.premiumSkuAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.premiumSkuAchPercent)}">${grandTotals.premiumSkuAchPercent.toFixed(2)}%</td>
-                        `;
-                }
-                
-                tfoot.appendChild(totalRow);
-                table.appendChild(tfoot);
-            }
-
-            function populateTerritoryChart(dataArray) {
-                const chartContainer = document.getElementById('stt-chart');
-                chartContainer.innerHTML = '';
-                
-                const timeElapsedText = document.querySelector('#territory-chart-container .text-sm');
-                if(timeElapsedText) timeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span> (Ranked by Achievement)`;
-
-
-                if (dataArray.length === 0) {
-                    chartContainer.innerHTML = `<div class="text-center py-8 text-gray-500 font-semibold">No chart data available for selection.</div>`;
-                    return;
-                }
-
-                dataArray
-                    .sort((a, b) => b.sttAchPercent - a.sttAchPercent)
-                    .forEach((data, index) => {
-                    const rank = index + 1; 
-                    data = calculatePercentages(data); 
-                    const achievement = data.sttAchPercent;
-                    const status = getRAGStatus(achievement);
-                    const barWidth = Math.min(100, achievement).toFixed(2); 
-
-                    const gapPercent = achievement - timeElapsedPercent;
-                    const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                    const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                    const chartItem = document.createElement('div');
-                    chartItem.className = 'flex items-center';
-                    chartItem.innerHTML = `
-                        <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                            <div class="font-bold text-gray-900 truncate">#${rank} ${data.territory}</div>
-                            <div class="text-xs text-gray-500 truncate">${data.tm}</div>
-                        </div>
-                        <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                            <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                            <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                            </div>
-                            <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                GAP: ${formattedGap}
-                            </span>
-                            ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                        </div>
-                    `;
-                    chartContainer.appendChild(chartItem);
-                });
-            }
-
-            function populateDbChart(dataArray) {
-                const chartContainer = document.getElementById('db-stt-chart');
-                chartContainer.innerHTML = '';
-                
-                const timeElapsedText = document.querySelector('#db-chart-container .text-sm');
-                if(timeElapsedText) timeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span> (Ranked by Achievement)`;
-
-
-                if (dataArray.length === 0) {
-                    chartContainer.innerHTML = `<div class="text-center py-8 text-gray-500 font-semibold">No chart data available for selection.</div>`;
-                    return;
-                }
-
-                dataArray
-                    .sort((a, b) => b.sttAchPercent - a.sttAchPercent)
-                    .forEach((data, index) => {
-                    const rank = index + 1; 
-                    data = calculatePercentages(data); 
-                    const achievement = data.sttAchPercent;
-                    const status = getRAGStatus(achievement);
-                    const barWidth = Math.min(100, achievement).toFixed(2); 
-
-                    const gapPercent = achievement - timeElapsedPercent;
-                    const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                    const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                    const chartItem = document.createElement('div');
-                    chartItem.className = 'flex items-center';
-                    chartItem.innerHTML = `
-                        <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                            <div class="font-bold text-gray-900 truncate">#${rank} ${data.dhName}</div>
-                            <div class="text-xs text-gray-500 truncate">${data.territory}</div>
-                        </div>
-                        <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                            <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                            <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                            </div>
-                            <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                GAP: ${formattedGap}
-                            </span>
-                            ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                        </div>
-                    `;
-                    chartContainer.appendChild(chartItem);
-                });
-            }
-            
-            function populateTopBottomSrCharts(dataArray) {
-                const topContainer = document.getElementById('top-10-sr-chart');
-                const bottomContainer = document.getElementById('bottom-10-sr-chart');
-                const topContainerParent = topContainer.closest('.lg\\:col-span-1');
-                const bottomContainerParent = bottomContainer.closest('.lg\\:col-span-1');
-                const topTitle = topContainerParent.querySelector('h2');
-                const bottomTitle = bottomContainerParent.querySelector('h2');
-                
-                topContainer.innerHTML = '';
-                bottomContainer.innerHTML = '';
-
-                const topTimeElapsedText = topContainerParent.querySelector('.text-sm');
-                if(topTimeElapsedText) topTimeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span>`;
-                const bottomTimeElapsedText = bottomContainerParent.querySelector('.text-sm');
-                if(bottomTimeElapsedText) bottomTimeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span>`;
-
-
-                const isFiltered = selectedFilters.Area !== 'All Areas' || 
-                                   selectedFilters.Territory !== 'All Territories' || 
-                                   selectedFilters['DB Name'] !== 'All DBs';
-
-                if (dataArray.length === 0) {
-                    topContainer.innerHTML = `<div class="text-center py-8 text-gray-500 font-semibold">No data available for selection.</div>`;
-                    bottomContainerParent.style.display = 'none'; 
-                    return;
-                }
-                
-                dataArray.forEach(data => calculatePercentages(data));
-                
-                const sortedSrData = [...dataArray].sort((a, b) => b.sttAchPercent - a.sttAchPercent);
-
-                if (isFiltered) {
-                    bottomContainerParent.style.display = 'none';
-                    
-                    topTitle.textContent = `DFF Performance in ${selectedFilters['DB Name'] === 'All DBs' ? selectedFilters.Territory : selectedFilters['DB Name']} (by STT Ach %)`;
-                    
-                    sortedSrData.forEach((data, index) => {
-                        const rankText = `#${data.nationalRank}`; 
-                        const achievement = data.sttAchPercent;
-                        const status = getRAGStatus(achievement);
-                        const barWidth = Math.min(100, achievement).toFixed(2); 
-                        const gapPercent = achievement - timeElapsedPercent;
-                        const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                        const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                        const chartItem = document.createElement('div');
-                        chartItem.className = 'flex items-center';
-                        chartItem.innerHTML = `
-                            <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                                <div class="font-bold text-gray-900 truncate">${rankText} ${data.dffName}</div>
-                                <div class="text-xs text-gray-500 truncate">${data.dhName}</div>
-                            </div>
-                            <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                                <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                                <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                    ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                                </div>
-                                <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                    GAP: ${formattedGap}
-                                </span>
-                                ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                            </div>
-                        `;
-                        topContainer.appendChild(chartItem);
-                    });
-
-                } else {
-                    bottomContainerParent.style.display = 'block';
-
-                    topTitle.textContent = 'Top 10 DFF Nationally (by STT Ach %)';
-                    bottomTitle.textContent = 'Bottom 10 DFF Nationally (by STT Ach %)';
-                    
-                    const top10 = sortedSrData.slice(0, 10);
-                    const bottom10 = sortedSrData.slice(-10).reverse(); 
-                    const medals = ['🥇', '🥈', '🥉'];
-
-                    top10.forEach((data, index) => {
-                        const achievement = data.sttAchPercent;
-                        const status = getRAGStatus(achievement);
-                        const barWidth = Math.min(100, achievement).toFixed(2); 
-                        const gapPercent = achievement - timeElapsedPercent;
-                        const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                        const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-                        const medal = medals[index] || `<span>#${data.nationalRank}</span>`; 
-
-                        const chartItem = document.createElement('div');
-                        chartItem.className = 'flex items-center';
-                        chartItem.innerHTML = `
-                            <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                                <div class="font-bold text-gray-900 truncate">${medal} ${data.dffName}</div>
-                                <div class="text-xs text-gray-500 truncate">${data.dhName}</div>
-                            </div>
-                            <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                                <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                                <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                    ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                                </div>
-                                <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                    GAP: ${formattedGap}
-                                </span>
-                                ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                            </div>
-                        `;
-                        topContainer.appendChild(chartItem);
-                    });
-                    
-                    bottom10.forEach((data, index) => {
-                        const rank = data.nationalRank; 
-                        const achievement = data.sttAchPercent;
-                        const status = getRAGStatus(achievement);
-                        const barWidth = Math.max(0, Math.min(100, achievement)).toFixed(2);
-                        const gapPercent = achievement - timeElapsedPercent;
-                        const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                        const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                        const chartItem = document.createElement('div');
-                        chartItem.className = 'flex items-center';
-                        chartItem.innerHTML = `
-                            <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                                <div class="font-bold text-gray-900 truncate">#${rank} ${data.dffName}</div>
-                                <div class="text-xs text-gray-500 truncate">${data.dhName}</div>
-                            </div>
-                            <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                                <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                                <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                    ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                                </div>
-                                <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                    GAP: ${formattedGap}
-                                </span>
-                                ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                            </div>
-                        `;
-                        bottomContainer.appendChild(chartItem);
-                    });
-                }
-            }
-
-
-            function updateSrStatus(srDataArray) {
-                const srHealthContainer = document.getElementById('sr-health');
-                if (!srHealthContainer) return;
-
-                let green = 0;
-                let amber = 0;
-                let red = 0;
-                
-                const total = srDataArray.length;
-
-                srDataArray.forEach(sr => {
-                    const status = getRAGStatus(sr.sttAchPercent);
-                    if (status.text === 'Green') green++;
-                    else if (status.text === 'Amber') amber++;
-                    else red++;
-                });
-
-                const greenPct = total > 0 ? (green / total) * 100 : 0;
-                const amberPct = total > 0 ? (amber / total) * 100 : 0;
-                const redPct = total > 0 ? (red / total) * 100 : 0;
-
-                srHealthContainer.innerHTML = `
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">DFF Status (Total: ${total})</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: ${greenPct.toFixed(2)}%;">${green > 0 ? green : ''}</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${amberPct.toFixed(2)}%; ${amberPct > 0 || amber == 0 ? 'min-width: 1.5rem;' : ''}">${amber}</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: ${redPct.toFixed(2)}%;">${red > 0 ? red : ''}</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: ${green}</span>
-                        <span class="text-amber">85-90%: ${amber}</span>
-                        <span class="text-red">Below 85%: ${red}</span>
-                    </div>
-                `;
-            }
-
-            function updateDbStatus(dbDataArray) {
-                const dbHealthContainer = document.getElementById('db-health');
-                if (!dbHealthContainer) return;
-
-                let green = 0;
-                let amber = 0;
-                let red = 0;
-                
-                dbDataArray.forEach(db => calculatePercentages(db));
-                const total = dbDataArray.length;
-
-                dbDataArray.forEach(db => {
-                    const status = getRAGStatus(db.sttAchPercent);
-                    if (status.text === 'Green') green++;
-                    else if (status.text === 'Amber') amber++;
-                    else red++;
-                });
-
-                const greenPct = total > 0 ? (green / total) * 100 : 0;
-                const amberPct = total > 0 ? (amber / total) * 100 : 0;
-                const redPct = total > 0 ? (red / total) * 100 : 0;
-
-                dbHealthContainer.innerHTML = `
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">DB Status (Total: ${total})</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: ${greenPct.toFixed(2)}%;">${green > 0 ? green : ''}</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${amberPct.toFixed(2)}%; ${amberPct > 0 || amber == 0 ? 'min-width: 1.5rem;' : ''}">${amber}</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: ${redPct.toFixed(2)}%;">${red > 0 ? red : ''}</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: ${green}</span>
-                        <span class="text-amber">85-90%: ${amber}</span>
-                        <span class="text-red">Below 85%: ${red}</span>
-                    </div>
-                `;
-            }
-            
-            // Initialize
-            preProcessData(); 
-            const initialTotals = calculateGrandTotals(fullSrData);
-            globalSttAch = initialTotals.sttAch;
-            const initialKpiData = updateKpiData(initialTotals);
-            populateKpiCards(initialKpiData);
-            populateTable('territory-list', processedTerritoryData, 'territory', 'tm');
-            populateTable('db-list', processedDbData, 'dhName', 'territory'); 
-            populateTable('sr-list', fullSrData, 'dffName', 'dhName', true); 
-            populateTerritoryChart(processedTerritoryData); 
-            populateDbChart(processedDbData); 
-            populateTopBottomSrCharts(fullSrData);
-            populateDateWiseChart(1); 
-            updateSrStatus(fullSrData);
-            updateDbStatus(processedDbData);
-            initializeFilters(); 
-            initializeTabs();
-            initializeTrendButtons();
         });
+
+        // Initialize Distributor Dropdown
+        const populateDistributors = () => {
+            distributorSelect.innerHTML = '<option value="" disabled selected>ডিস্ট্রিবিউশন সিলেক্ট করুন</option>';
+            
+            for (const [code, info] of Object.entries(db)) {
+                const option = document.createElement('option');
+                option.value = code;
+                option.textContent = `${info.name} (${code})`;
+                distributorSelect.appendChild(option);
+            }
+        };
+
+        // Event Listener: Distributor Selection
+        distributorSelect.addEventListener('change', function() {
+            const selectedDistCode = this.value;
+            
+            // 1. Update Hidden Fields for Distributor
+            document.getElementById('distributor_code').value = selectedDistCode;
+            document.getElementById('distributor_name').value = db[selectedDistCode].name;
+
+            // 2. Enable and Populate Route Dropdown
+            routeSelect.disabled = false;
+            routeSelect.innerHTML = '<option value="" disabled selected>রুট সিলেক্ট করুন</option>';
+            
+            const routes = db[selectedDistCode].routes;
+            routes.forEach(route => {
+                const option = document.createElement('option');
+                option.value = route.code;
+                option.textContent = `${route.name} (${route.code})`;
+                routeSelect.appendChild(option);
+            });
+            
+            // 3. Clear Route Hidden fields in case user changes distributor but not route
+            document.getElementById('route_code').value = "";
+            document.getElementById('route_name').value = "";
+        });
+
+        // Event Listener: Route Selection
+        routeSelect.addEventListener('change', function() {
+            const selectedRouteCode = this.value;
+            // Find the name for this code within the selected distributor's routes
+            const distCode = distributorSelect.value;
+            const routeObj = db[distCode].routes.find(r => r.code === selectedRouteCode);
+            
+            if (routeObj) {
+                document.getElementById('route_code').value = selectedRouteCode;
+                document.getElementById('route_name').value = routeObj.name;
+            }
+        });
+
+        // Run Initialization
+        populateDistributors();
+
+        // IMPORTANT: Replace this URL with your Google Web App URL after deploying the backend code
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9WuBOgKRgfol24Def7xKGwUHu6zfJPhdpuwqlE58yWgraHM7uXKpJlCmwa4HCKqNW/exec';
+
+        // Helper function to convert file to Base64 string
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            
+            // UI Loading State
+            btnText.classList.add('hidden');
+            btnLoader.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            // Collect Data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Handle File Upload process
+            const fileInput = document.getElementById('shop_image');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                try {
+                    // Convert file to Base64 before sending
+                    const base64File = await fileToBase64(file);
+                    // Replace the file object with the image data structure
+                    data.shop_image = {
+                        name: file.name,
+                        type: file.type,
+                        data: base64File
+                    };
+                } catch (error) {
+                    console.error("Error converting file:", error);
+                    showError();
+                    return; // Stop submission if file conversion fails
+                }
+            }
+
+            // --- REAL SUBMISSION MODE ---
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                mode: 'no-cors' 
+            })
+            .then(() => {
+                showSuccess();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError();
+            });
+        });
+
+        function showSuccess() {
+            form.classList.add('hidden');
+            successMessage.classList.remove('hidden');
+            btnLoader.classList.add('hidden');
+            btnText.classList.remove('hidden');
+        }
+
+        function showError() {
+            errorMessage.classList.remove('hidden');
+            btnLoader.classList.add('hidden');
+            btnText.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+
+        function resetForm() {
+            form.reset();
+            successMessage.classList.add('hidden');
+            form.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            errorMessage.classList.add('hidden');
+            
+            // Reset dropdowns
+            distributorSelect.value = "";
+            routeSelect.innerHTML = '<option value="" disabled selected>প্রথমে ডিস্ট্রিবিউশন সিলেক্ট করুন</option>';
+            routeSelect.disabled = true;
+        }
     </script>
 </body>
 </html>
