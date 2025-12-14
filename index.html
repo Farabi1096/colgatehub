@@ -66,8 +66,8 @@
             <div class="absolute top-0 left-0 w-full h-full bg-blue-700 opacity-20 transform -skew-y-6 origin-top-left"></div>
             
             <div class="relative z-10">
-                <h2 class="text-xl sm:text-2xl font-bold text-white">কোলগেট স্মাইল হাব</h2>
-                <p class="text-blue-100 mt-2 text-sm">
+                <h2 id="formTitle" class="text-xl sm:text-2xl font-bold text-white">কোলগেট স্মাইল হাব</h2>
+                <p id="formSubtitle" class="text-blue-100 mt-2 text-sm">
                     নতুন দোকান যুক্ত করার জন্য নিচের ফর্মটি পূরণ করুন
                 </p>
             </div>
@@ -82,7 +82,11 @@
                 <input type="hidden" name="distributor_name" id="distributor_name">
                 <input type="hidden" name="route_code" id="route_code">
                 <input type="hidden" name="route_name" id="route_name">
+                <!-- Submission Type to distinguish in backend -->
+                <input type="hidden" name="submission_type" id="submission_type" value="New Shop">
 
+                <!-- === COMMON FIELDS (Always Visible) === -->
+                
                 <!-- Field 1: Distributor Dropdown -->
                 <div class="input-group relative">
                     <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
@@ -123,110 +127,187 @@
                     </div>
                 </div>
 
-                <!-- Field 5: Channel Type -->
-                <div class="input-group relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
-                        চ্যানেল টাইপ (Channel Type) <span class="text-blue-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="shopping-bag" class="h-5 w-5 text-gray-400 transition-colors"></i>
+
+                <!-- === SECTION A: NEW OUTLET FIELDS (Default) === -->
+                <div id="newOutletFields" class="space-y-4 sm:space-y-5">
+                    
+                    <!-- Channel Type -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            চ্যানেল টাইপ (Channel Type) <span class="text-blue-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="shopping-bag" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <select name="channel_type" required
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none appearance-none">
+                                <option value="" disabled selected>চ্যানেল টাইপ সিলেক্ট করুন</option>
+                                <option value="General Stores">General Stores</option>
+                                <option value="Pharmacy">Pharmacy</option>
+                                <option value="Grocery stores">Grocery stores</option>
+                                <option value="Wholesale">Wholesale</option>
+                                <option value="Cosmetic Store">Cosmetic Store</option>
+                                <option value="Modern Trade">Modern Trade</option>
+                                <option value="Others">Others</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                            </div>
                         </div>
-                        <select name="channel_type" required
-                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none appearance-none">
-                            <option value="" disabled selected>চ্যানেল টাইপ সিলেক্ট করুন</option>
-                            <option value="General Stores">General Stores</option>
-                            <option value="Pharmacy">Pharmacy</option>
-                            <option value="Grocery stores">Grocery stores</option>
-                            <option value="Wholesale">Wholesale</option>
-                            <option value="Cosmetic Store">Cosmetic Store</option>
-                            <option value="Modern Trade">Modern Trade</option>
-                            <option value="Others">Others</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                    </div>
+
+                    <!-- Outlet Name (English) -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            দোকানের নাম (ইংরেজিতে) <span class="text-blue-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="store" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="text" name="outlet_name_en" required
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                                placeholder="Store Name in English">
                         </div>
+                    </div>
+
+                    <!-- Outlet Name (Bangla) -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            দোকানের নাম (বাংলায়) <span class="text-blue-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="type" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="text" name="outlet_name_bn" required
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                                placeholder="দোকানের নাম বাংলায় লিখুন">
+                        </div>
+                    </div>
+
+                    <!-- Owner Name -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            মালিকের নাম (Owner Name) <span class="text-blue-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="user" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="text" name="owner_name" required
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                                placeholder="মালিকের নাম লিখুন">
+                        </div>
+                    </div>
+
+                    <!-- Owner Mobile -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            মালিকের মোবাইল নাম্বার (Owner Phone No.) <span class="text-blue-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="phone" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="tel" name="owner_mobile" required
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                                placeholder="01XXXXXXXXX" 
+                                maxlength="11"
+                                minlength="11"
+                                pattern="01[0-9]{9}"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                    </div>
+
+                    <!-- Shop Image Upload (OPTIONAL) -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            দোকানের ছবি (Shop Image) <span class="text-gray-400 text-xs font-normal ml-1">(Optional)</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="image" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="file" id="shop_image" name="shop_image" accept="image/*"
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">দোকানের ডিসপ্লের একটি পরিষ্কার ছবি আপলোড করুন।</p>
                     </div>
                 </div>
 
-                <!-- Field 6: Outlet Name (English) -->
-                <div class="input-group relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
-                        দোকানের নাম (ইংরেজিতে) <span class="text-blue-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="store" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                <!-- === SECTION B: DISCONTINUE OUTLET FIELDS (Hidden by default) === -->
+                <div id="discontinueOutletFields" class="space-y-4 sm:space-y-5 hidden">
+                    
+                    <!-- Outlet Code -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            আউটলেট কোড (Outlet Code) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="hash" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="text" name="outlet_code" disabled required
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                                placeholder="Outlet Code">
                         </div>
-                        <input type="text" name="outlet_name_en" required
-                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
-                            placeholder="Store Name in English">
                     </div>
-                </div>
 
-                <!-- Field 7: Outlet Name (Bangla) -->
-                <div class="input-group relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
-                        দোকানের নাম (বাংলায়) <span class="text-blue-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="type" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                    <!-- Outlet Name (Single Field) -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            আউটলেট নাম (Outlet Name) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="store" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="text" name="outlet_name_discontinue" disabled required
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                                placeholder="Outlet Name">
                         </div>
-                        <input type="text" name="outlet_name_bn" required
-                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
-                            placeholder="দোকানের নাম বাংলায় লিখুন">
                     </div>
-                </div>
 
-                <!-- Field 8: Owner Name -->
-                <div class="input-group relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
-                        মালিকের নাম (Owner Name) <span class="text-blue-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="user" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                    <!-- Reason -->
+                    <div class="input-group relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            বন্ধের কারণ (Reason) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="alert-circle" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <select name="reason" id="reasonSelect" disabled required onchange="toggleOtherReason(this)"
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none appearance-none">
+                                <option value="" disabled selected>কারণ সিলেক্ট করুন</option>
+                                <option value="Permanently Closed">Permanently Closed (স্থায়ীভাবে বন্ধ)</option>
+                                <option value="Temporarily Closed">Temporarily Closed (সাময়িক বন্ধ)</option>
+                                <option value="Low Sales">Low Sales (কম বিক্রি)</option>
+                                <option value="Others">Others (অন্যান্য)</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                            </div>
                         </div>
-                        <input type="text" name="owner_name" required
-                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
-                            placeholder="মালিকের নাম লিখুন">
                     </div>
-                </div>
+                    
+                    <!-- Other Reason Input (Conditional) -->
+                    <div id="otherReasonContainer" class="input-group relative hidden transition-all">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
+                            অন্যান্য কারণ লিখুন (Specify Reason) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="edit-3" class="h-5 w-5 text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="text" name="other_reason_desc" id="otherReasonInput" disabled
+                                class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
+                                placeholder="Describe the reason">
+                        </div>
+                    </div>
 
-                <!-- Field 9: Owner Mobile -->
-                <div class="input-group relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
-                        মালিকের মোবাইল নাম্বার (Owner Phone No.) <span class="text-blue-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="phone" class="h-5 w-5 text-gray-400 transition-colors"></i>
-                        </div>
-                        <input type="tel" name="owner_mobile" required
-                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none" 
-                            placeholder="01XXXXXXXXX" 
-                            maxlength="11"
-                            minlength="11"
-                            pattern="01[0-9]{9}"
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                    </div>
-                </div>
-
-                <!-- Field 10: Shop Image Upload (OPTIONAL) -->
-                <div class="input-group relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1 transition-colors">
-                        দোকানের ছবি (Shop Image) <span class="text-gray-400 text-xs font-normal ml-1">(Optional)</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="image" class="h-5 w-5 text-gray-400 transition-colors"></i>
-                        </div>
-                        <!-- Removed 'required' attribute -->
-                        <input type="file" id="shop_image" name="shop_image" accept="image/*"
-                            class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:bg-white text-gray-900 text-base sm:text-sm py-3 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">দোকানের ডিসপ্লের একটি পরিষ্কার ছবি আপলোড করুন।</p>
                 </div>
 
                 <!-- Submit Button -->
@@ -278,20 +359,30 @@
         </div>
         
         <!-- Sidebar Content -->
-        <div class="p-4 flex-1 overflow-y-auto bg-gray-50">
+        <div class="p-4 flex-1 overflow-y-auto bg-gray-50 space-y-3">
+             <!-- Option: New Shop Entry -->
+             <a href="#" onclick="switchMode('new')" class="flex items-center gap-3 p-4 bg-white border border-blue-100 rounded-xl shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
+                <div class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <i data-lucide="plus-circle" class="h-5 w-5 text-blue-600"></i>
+                </div>
+                <div class="flex-1">
+                    <span class="block font-semibold text-gray-800 text-sm">New Shop Entry</span>
+                    <span class="block text-xs text-gray-500">নতুন দোকান যুক্ত করুন</span>
+                </div>
+                <i data-lucide="chevron-right" class="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors"></i>
+            </a>
+
              <!-- Option: Discontinue Outlet -->
-             <a href="#" class="flex items-center gap-3 p-4 bg-white border border-red-100 rounded-xl shadow-sm hover:shadow-md hover:border-red-200 transition-all group">
+             <a href="#" onclick="switchMode('discontinue')" class="flex items-center gap-3 p-4 bg-white border border-red-100 rounded-xl shadow-sm hover:shadow-md hover:border-red-200 transition-all group">
                 <div class="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                     <i data-lucide="x-circle" class="h-5 w-5 text-red-600"></i>
                 </div>
                 <div class="flex-1">
                     <span class="block font-semibold text-gray-800 text-sm">Discontinue Outlet Submit</span>
-                    <span class="block text-xs text-gray-500">Click to report a closed outlet</span>
+                    <span class="block text-xs text-gray-500">দোকান বাদ দেওয়ার জন্য</span>
                 </div>
                 <i data-lucide="chevron-right" class="h-4 w-4 text-gray-400 group-hover:text-red-500 transition-colors"></i>
             </a>
-            
-            <!-- You can add more menu items here in the future -->
         </div>
         
         <!-- Sidebar Footer -->
@@ -314,6 +405,16 @@
         const distributorSelect = document.getElementById('distributorSelect');
         const routeSelect = document.getElementById('routeSelect');
         
+        // Mode Management
+        let isDiscontinueMode = false;
+        const formTitle = document.getElementById('formTitle');
+        const formSubtitle = document.getElementById('formSubtitle');
+        const newOutletFields = document.getElementById('newOutletFields');
+        const discontinueOutletFields = document.getElementById('discontinueOutletFields');
+        const submissionTypeInput = document.getElementById('submission_type');
+        const otherReasonContainer = document.getElementById('otherReasonContainer');
+        const otherReasonInput = document.getElementById('otherReasonInput');
+
         // Sidebar Elements
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
@@ -325,21 +426,81 @@
             const isClosed = sidebar.classList.contains('translate-x-full');
             
             if (isClosed) {
-                // Open Sidebar
                 sidebar.classList.remove('translate-x-full');
                 sidebarOverlay.classList.remove('hidden');
-                // Small delay to allow display:block to apply before transitioning opacity
                 setTimeout(() => {
                     sidebarOverlay.classList.remove('opacity-0');
                 }, 10);
             } else {
-                // Close Sidebar
                 sidebar.classList.add('translate-x-full');
                 sidebarOverlay.classList.add('opacity-0');
-                // Wait for transition to finish before hiding
                 setTimeout(() => {
                     sidebarOverlay.classList.add('hidden');
                 }, 300);
+            }
+        }
+
+        // --- Mode Switching Logic ---
+        function switchMode(mode) {
+            toggleSidebar();
+            
+            if (mode === 'discontinue') {
+                isDiscontinueMode = true;
+                
+                formTitle.textContent = "Discontinue Outlet";
+                formSubtitle.textContent = "দোকান বাদ দেওয়ার জন্য ফর্মটি পূরণ করুন";
+                submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-500');
+                submitBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-500');
+                
+                newOutletFields.classList.add('hidden');
+                discontinueOutletFields.classList.remove('hidden');
+                
+                toggleInputs(newOutletFields, false);
+                toggleInputs(discontinueOutletFields, true);
+                
+                // Re-evaluate 'Other Reason' state
+                toggleOtherReason(document.getElementById('reasonSelect'));
+                
+                submissionTypeInput.value = "Discontinue Outlet";
+
+            } else {
+                isDiscontinueMode = false;
+                
+                formTitle.textContent = "কোলগেট স্মাইল হাব";
+                formSubtitle.textContent = "নতুন দোকান যুক্ত করার জন্য নিচের ফর্মটি পূরণ করুন";
+                submitBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-500');
+                submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-500');
+
+                newOutletFields.classList.remove('hidden');
+                discontinueOutletFields.classList.add('hidden');
+
+                toggleInputs(newOutletFields, true);
+                toggleInputs(discontinueOutletFields, false);
+                
+                submissionTypeInput.value = "New Shop";
+            }
+        }
+
+        function toggleInputs(container, shouldEnable) {
+            const inputs = container.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = !shouldEnable;
+            });
+        }
+        
+        function toggleOtherReason(selectElement) {
+            // Only toggle if we are in discontinue mode
+            if (!isDiscontinueMode) return;
+
+            if (selectElement.value === 'Others') {
+                otherReasonContainer.classList.remove('hidden');
+                otherReasonInput.disabled = false;
+                otherReasonInput.required = true;
+            } else {
+                otherReasonContainer.classList.add('hidden');
+                otherReasonInput.disabled = true;
+                otherReasonInput.required = false;
+                otherReasonInput.value = "";
             }
         }
 
@@ -352,7 +513,7 @@
         closeSidebar.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
-        // Embedded Data (TSV Format)
+        // Embedded Data (TSV Format) - Keeping existing data
         const rawData = `B002\tTakwa Enterprise\tBDR0000040\tSOLMAID
 B002\tTakwa Enterprise\tBDR0000041\tNORDDA
 B002\tTakwa Enterprise\tBDR0000042\tKURATOLI
@@ -893,18 +1054,20 @@ B015\tNext Associates\tBDR0000570\tCNB`;
             
             // Mobile Number Validation
             const mobileInput = form.querySelector('input[name="owner_mobile"]');
-            const mobileNumber = mobileInput.value;
             
-            if (mobileNumber.length !== 11) {
-                // Reset UI state if validation fails
-                btnText.classList.remove('hidden');
-                btnLoader.classList.add('hidden');
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
-                
-                alert("মোবাইল নাম্বার অবশ্যই ১১ ডিজিটের হতে হবে।");
-                mobileInput.focus();
-                return;
+            if (!isDiscontinueMode && mobileInput) {
+                const mobileNumber = mobileInput.value;
+                if (mobileNumber.length !== 11) {
+                    // Reset UI state if validation fails
+                    btnText.classList.remove('hidden');
+                    btnLoader.classList.add('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    
+                    alert("মোবাইল নাম্বার অবশ্যই ১১ ডিজিটের হতে হবে।");
+                    mobileInput.focus();
+                    return;
+                }
             }
 
             // UI Loading State
@@ -919,7 +1082,7 @@ B015\tNext Associates\tBDR0000570\tCNB`;
 
             // Handle File Upload process
             const fileInput = document.getElementById('shop_image');
-            if (fileInput.files.length > 0) {
+            if (fileInput && fileInput.files.length > 0 && !isDiscontinueMode) {
                 const file = fileInput.files[0];
                 try {
                     // Convert file to Base64 before sending
@@ -979,6 +1142,9 @@ B015\tNext Associates\tBDR0000570\tCNB`;
             distributorSelect.value = "";
             routeSelect.innerHTML = '<option value="" disabled selected>প্রথমে ডিস্ট্রিবিউশন সিলেক্ট করুন</option>';
             routeSelect.disabled = true;
+            
+            // If checking 'new shop entry' again, might want to reset mode:
+            // switchMode('new'); // Optional: reset to default view on success reset
         }
     </script>
 </body>
